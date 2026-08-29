@@ -50,7 +50,7 @@ export default function Dashboard() {
       setCourses(coursesData);
       
       const { data: schedulesData } = await supabase.from("schedules").select("*").eq("user_id", user.id);
-      setHasSchedules(Boolean(schedulesData && schedulesData.length > 0));
+      setHasSchedules(schedulesData && schedulesData.length > 0);
       
       let totalRequiredHoursWeekly = 0;
       let totalAllowedHoursWeekly = 0;
