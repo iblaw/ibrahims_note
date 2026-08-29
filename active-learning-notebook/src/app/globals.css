@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fcf9f5; /* Warm cream */
+  --foreground: #383431; /* Deep warm gray */
+  --primary: #d1c4b5;    /* Sand */
+  --secondary: #e6dfd8;  /* Light sand */
+  --accent: #f5f1eb;     /* Off-white sand */
+  
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-full: 9999px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #242220; /* Deep warm charcoal */
+    --foreground: #eceae8; /* Soft warm white */
+    --primary: #5c5651;    
+    --secondary: #403b38;
+    --accent: #2e2a28;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: ui-rounded, 'Nunito', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Base button and card styles for a bubbly look */
+.bubbly-card {
+  @apply bg-white dark:bg-[#2e2a28] rounded-3xl shadow-sm border border-neutral-200 dark:border-neutral-700 p-6;
+}
+
+.bubbly-button {
+  @apply px-6 py-3 rounded-full font-bold transition-all transform hover:-translate-y-1 hover:shadow-md active:translate-y-0 active:shadow-none;
 }
