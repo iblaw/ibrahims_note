@@ -103,13 +103,9 @@ export default function Home() {
 
           <div className="flex items-center gap-4">
             <a href="/login" className="text-sm text-neutral-600 hover:text-neutral-900 underline">Explore sample notes</a>
-            <button onClick={() => {
-              // soft link to header — encourage user to use header CTA for modal if present
-              const btn = document.querySelector('button.bubbly-button');
-              if (btn instanceof HTMLElement) btn.click();
-            }} className="bubbly-button bg-orange-500 text-white px-6 py-3 font-bold rounded-full">
+            <Link href="/login" className="bubbly-button bg-orange-500 text-white px-6 py-3 font-bold rounded-full inline-flex items-center justify-center">
               Create your free account
-            </button>
+            </Link>
           </div>
         </div>
 
