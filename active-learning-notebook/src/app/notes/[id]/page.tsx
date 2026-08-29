@@ -33,7 +33,7 @@ export default async function ViewNote({ params }: { params: { id: string } }) {
 
   return (
     <div className="max-w-4xl mx-auto pb-24">
-      <Link href="/archive" className="inline-flex items-center gap-2 text-neutral-500 hover:text-orange-500 font-bold mb-8 transition-colors">
+      <Link href="/archive" className="inline-flex items-center gap-2 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 font-bold mb-8 transition-colors">
         <ArrowLeft size={20} />
         Back to Archive
       </Link>

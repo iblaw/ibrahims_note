@@ -21,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${nunito.variable} antialiased min-h-screen flex flex-col`}>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning className={`${nunito.variable} antialiased min-h-screen flex flex-col`}>
         {/* Navigation Bar */}
         <nav className="w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-primary/20">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,7 +30,7 @@ export default function RootLayout({
               <div className="flex-shrink-0 flex items-center">
                 <Link href="/" className="font-extrabold text-2xl tracking-tight flex items-center gap-2">
                   <span className="text-3xl">✨</span>
-                  <span className="bg-gradient-to-r from-orange-400 to-rose-400 bg-clip-text text-transparent">
+                  <span className="text-neutral-800 dark:text-neutral-100">
                     Aura
                   </span>
                 </Link>
@@ -58,7 +58,7 @@ function NavLink({ href, icon, label }: { href: string; icon: React.ReactNode; l
   return (
     <Link 
       href={href} 
-      className="flex items-center gap-2 text-foreground/70 hover:text-orange-500 font-bold transition-colors px-3 py-2 rounded-full hover:bg-orange-50 dark:hover:bg-zinc-800"
+      className="flex items-center gap-2 text-foreground/70 hover:text-neutral-900 dark:hover:text-neutral-100 font-bold transition-colors px-3 py-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
     >
       {icon}
       <span className="hidden sm:inline">{label}</span>

@@ -24,7 +24,7 @@ export default async function Archive() {
         
         <Link 
           href="/notes/new" 
-          className="bubbly-button bg-orange-400 text-white flex items-center gap-2 justify-center w-fit shadow-orange-200"
+          className="bubbly-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 flex items-center gap-2 justify-center w-fit shadow-neutral-300 dark:shadow-neutral-900"
         >
           <Plus size={20} />
           New Note
@@ -32,15 +32,15 @@ export default async function Archive() {
       </div>
 
       {(!notes || notes.length === 0) ? (
-        <div className="text-center py-24 bg-orange-50/50 dark:bg-orange-950/10 rounded-3xl border-2 border-dashed border-orange-200 dark:border-orange-900/30">
-          <Book size={48} className="mx-auto text-orange-300 mb-4" />
+        <div className="text-center py-24 bg-neutral-100 dark:bg-neutral-900/50 rounded-3xl border-2 border-dashed border-neutral-300 dark:border-neutral-700">
+          <Book size={48} className="mx-auto text-neutral-400 dark:text-neutral-500 mb-4" />
           <h2 className="text-2xl font-bold text-neutral-700 dark:text-neutral-200 mb-2">
             Your archive is empty
           </h2>
           <p className="text-neutral-500 dark:text-neutral-400 font-medium max-w-md mx-auto mb-8">
             Start building your knowledge base by creating your first active learning note.
           </p>
-          <Link href="/notes/new" className="text-orange-500 font-bold hover:underline">
+          <Link href="/notes/new" className="text-neutral-800 dark:text-neutral-200 font-bold hover:underline">
             Create Note &rarr;
           </Link>
         </div>
@@ -57,17 +57,17 @@ export default async function Archive() {
               <Link 
                 key={note.id} 
                 href={`/notes/${note.id}`}
-                className="bubbly-card group flex flex-col justify-between hover:border-orange-300 dark:hover:border-orange-700 transition-colors"
+                className="bubbly-card group flex flex-col justify-between hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
               >
                 <div>
-                  <h3 className="text-2xl font-bold mb-2 group-hover:text-orange-500 transition-colors">
+                  <h3 className="text-2xl font-bold mb-2 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors">
                     {note.title}
                   </h3>
                   <p className="text-neutral-500 text-sm font-medium mb-6">
                     Created {dateStr}
                   </p>
                 </div>
-                <div className="flex justify-between items-center text-sm font-bold text-neutral-400 group-hover:text-orange-400 transition-colors">
+                <div className="flex justify-between items-center text-sm font-bold text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors">
                   <span>Review content</span>
                   <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
                 </div>

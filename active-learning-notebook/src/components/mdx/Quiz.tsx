@@ -16,8 +16,8 @@ export default function Quiz({ question, options, answer }: QuizProps) {
   const isCorrect = selected === answer.trim();
 
   return (
-    <div className="my-8 bubbly-card bg-orange-50/50 dark:bg-orange-950/10 border-orange-100 dark:border-orange-900/30">
-      <h3 className="text-xl font-bold mb-4 text-orange-900 dark:text-orange-200">
+    <div className="my-8 bubbly-card bg-neutral-50/50 dark:bg-neutral-900/30 border-neutral-200 dark:border-neutral-700/50">
+      <h3 className="text-xl font-bold mb-4 text-neutral-800 dark:text-neutral-200">
         ✨ Quick Recall
       </h3>
       <p className="text-lg mb-6 font-medium">{question}</p>
@@ -27,7 +27,7 @@ export default function Quiz({ question, options, answer }: QuizProps) {
           const isSelected = selected === opt;
           const isActuallyCorrect = opt === answer.trim();
           
-          let buttonStyles = "bg-white dark:bg-zinc-800 hover:bg-orange-100 dark:hover:bg-zinc-700 border-neutral-200 dark:border-zinc-600";
+          let buttonStyles = "bg-white dark:bg-zinc-800 hover:bg-neutral-100 dark:hover:bg-zinc-700 border-neutral-200 dark:border-zinc-600";
           
           if (selected) {
             if (isActuallyCorrect) {
