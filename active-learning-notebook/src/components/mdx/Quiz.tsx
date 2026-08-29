@@ -12,7 +12,9 @@ interface QuizProps {
 export default function Quiz({ question, options, answer }: QuizProps) {
   const [selected, setSelected] = useState<string | null>(null);
   
-  const optionsList = options.split(",").map(o => o.trim());
+  // Support both legacy comma-separated and new pipe-separated formats
+  const separator = options.includes("|") ? "|" : ",";
+  const optionsList = options.split(separator).map(o => o.trim());
   const isCorrect = selected === answer.trim();
 
   return (

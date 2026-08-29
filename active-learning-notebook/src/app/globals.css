@@ -1,50 +1,109 @@
 @import "tailwindcss";
 
-:root {
-  --background: #fcf9f5; /* Warm cream */
-  --foreground: #383431; /* Deep warm gray */
-  --primary: #d1c4b5;    /* Sand */
-  --secondary: #e6dfd8;  /* Light sand */
-  --accent: #f5f1eb;     /* Off-white sand */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* 1. Surface & Typography (Warm neutrals) */
+  --color-neutral-50: #F9F8F6;
+  --color-neutral-100: #EFECE6;
+  --color-neutral-200: #E1DBD2;
+  --color-neutral-300: #CFC5B8;
+  --color-neutral-400: #B0A190;
+  --color-neutral-500: #93816F;
+  --color-neutral-600: #746353;
+  --color-neutral-700: #55483B;
+  --color-neutral-800: #3B3128;
+  --color-neutral-900: #251F19;
   
-  --radius-sm: 0.5rem;
-  --radius-md: 1rem;
-  --radius-lg: 1.5rem;
-  --radius-full: 9999px;
-}
+  /* 2. Primary Brand (Lumen Orange) */
+  --color-brand-50: #FFF3E5;
+  --color-brand-100: #FFE1C2;
+  --color-brand-200: #FFC999;
+  --color-brand-300: #FFA866;
+  --color-brand-400: #FF8533;
+  --color-brand-500: #FF6200; /* Primary Base */
+  --color-brand-600: #CC4E00;
+  --color-brand-700: #993B00;
+  --color-brand-800: #662700;
+  --color-brand-900: #331400;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-secondary: var(--secondary);
-  --color-accent: var(--accent);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* 3. Secondary Accent (Deep Royal Blue / Indigo) */
+  --color-accent-50: #EBF0FF;
+  --color-accent-100: #C2D1FF;
+  --color-accent-200: #99B2FF;
+  --color-accent-300: #7093FF;
+  --color-accent-400: #4774FF;
+  --color-accent-500: #2659FF; /* Accent Base */
+  --color-accent-600: #1B3FBF;
+  --color-accent-700: #112880;
+  --color-accent-800: #081640;
+  --color-accent-900: #040B20;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #242220; /* Deep warm charcoal */
-    --foreground: #eceae8; /* Soft warm white */
-    --primary: #5c5651;    
-    --secondary: #403b38;
-    --accent: #2e2a28;
-  }
+  /* 4. Success (Fresh Green) */
+  --color-success-50: #E8F7F0;
+  --color-success-100: #C0EADB;
+  --color-success-400: #34D399;
+  --color-success-500: #10B981;
+  --color-success-600: #059669;
+
+  /* Map existing classes across app to strict palette */
+  --color-orange-50: var(--color-brand-50);
+  --color-orange-100: var(--color-brand-100);
+  --color-orange-200: var(--color-brand-200);
+  --color-orange-300: var(--color-brand-300);
+  --color-orange-400: var(--color-brand-400);
+  --color-orange-500: var(--color-brand-500);
+  --color-orange-600: var(--color-brand-600);
+  --color-orange-700: var(--color-brand-700);
+
+  --color-blue-50: var(--color-accent-50);
+  --color-blue-100: var(--color-accent-100);
+  --color-blue-200: var(--color-accent-200);
+  --color-blue-300: var(--color-accent-300);
+  --color-blue-400: var(--color-accent-400);
+  --color-blue-500: var(--color-accent-500);
+  --color-blue-600: var(--color-accent-600);
+  --color-blue-700: var(--color-accent-700);
+  --color-blue-800: var(--color-accent-800);
+  --color-blue-900: var(--color-accent-900);
+
+  --color-green-50: var(--color-success-50);
+  --color-green-100: var(--color-success-100);
+  --color-green-400: var(--color-success-400);
+  --color-green-500: var(--color-success-500);
+  --color-green-600: var(--color-success-600);
+
+  --color-background: var(--color-neutral-50);
+  --color-foreground: var(--color-neutral-900);
+  --font-sans: var(--font-fredoka);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: ui-rounded, 'Nunito', system-ui, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), ui-rounded, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  color-scheme: light;
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(28, 100%, 74%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(189, 100%, 56%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(355, 100%, 93%, 0.15) 0px, transparent 50%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-/* Base button and card styles for a bubbly look */
+/* Premium modern card styles */
 .bubbly-card {
-  @apply bg-white dark:bg-[#2e2a28] rounded-3xl shadow-sm border border-neutral-200 dark:border-neutral-700 p-6;
+  @apply bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)] border border-white/60 p-6 transition-all duration-500 ease-out;
+}
+.bubbly-card:hover {
+  @apply shadow-[0_16px_60px_-15px_rgba(0,0,0,0.15)] border-white/80 -translate-y-1;
 }
 
 .bubbly-button {
-  @apply px-6 py-3 rounded-full font-bold transition-all transform hover:-translate-y-1 hover:shadow-md active:translate-y-0 active:shadow-none;
+  @apply px-6 py-3 rounded-full font-bold transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/20 active:scale-95 active:translate-y-0 active:shadow-none shadow-md;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
 }

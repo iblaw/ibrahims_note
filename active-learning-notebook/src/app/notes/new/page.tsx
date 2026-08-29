@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { Sparkles, Loader2, Copy, Check } from "lucide-react";
+import { Sparkles, Loader2, Copy, Check, Link as LinkIcon } from "lucide-react";
 
 const PROMPT_TEMPLATE = `Context: You are an expert instructional designer and AI tutor. Your task is to generate a structured Note Document for a specialized Active Learning platform. The user will provide EITHER raw study materials OR just a Topic Name.
 
@@ -21,14 +21,16 @@ CRITICAL INSTRUCTION: You must output the content in Markdown format, but use th
 3. Chunking & In-Text Quizzes
 - Break the document into logical segments (2-3 paragraphs max).
 - At the end of EVERY segment, insert a quiz EXACTLY like this:
-<Quiz question="[Question text]" options="[Option 1], [Option 2], [Option 3]" answer="[Exact text of correct option]" />
+<Quiz question="[Question text]" options="[Option 1] | [Option 2] | [Option 3]" answer="[Exact text of correct option]" />
 
 4. Segment Challenge (Feynman Prompt)
 - At major milestones, challenge the user to explain it EXACTLY like this:
 <FeynmanPrompt concept="[Concept to explain]" />
 
 5. Extraction for Spaced Repetition (Flashcards)
-- At the bottom of the document, generate a list of 5-10 flashcards (short-answer/fill-in-the-blank) EXACTLY like this:
+- Apply the Pareto Principle: Extract the most critical 20% of information that yields 80% of the understanding.
+- Generate at least 2-3 flashcards PER SECTION of the document. Do not just summarize the whole document into 5 cards. You should output a robust list (15+ cards for large topics) covering all critical definitions, formulas, and concepts.
+- Output them at the bottom of the document EXACTLY like this:
 <Flashcard front="[Question]" back="[Answer]" />
 `;
 
@@ -37,7 +39,40 @@ export default function CreateNote() {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
+  
+  // Linking state
+  const [courses, setCourses] = useState<any[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [selectedTopic, setSelectedTopic] = useState<string>("");
+  const [availableTopics, setAvailableTopics] = useState<string[]>([]);
+  
   const router = useRouter();
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    const { data } = await supabase.from("courses").select("*").order("created_at", { ascending: false });
+    if (data) setCourses(data);
+  };
+
+  useEffect(() => {
+    if (!selectedCourseId) {
+      setAvailableTopics([]);
+      return;
+    }
+    const course = courses.find(c => c.id === selectedCourseId);
+    if (course && course.syllabus && course.syllabus.modules) {
+      const topics: string[] = [];
+      course.syllabus.modules.forEach((m: any) => {
+        m.topics?.forEach((t: any) => topics.push(t.title));
+      });
+      setAvailableTopics(topics);
+    } else {
+      setAvailableTopics([]);
+    }
+  }, [selectedCourseId, courses]);
 
   const handleCopyPrompt = () => {
     navigator.clipboard.writeText(PROMPT_TEMPLATE);
@@ -52,7 +87,12 @@ export default function CreateNote() {
     try {
       const { data: note, error: noteError } = await supabase
         .from("notes")
-        .insert([{ title, content }])
+        .insert([{ 
+          title, 
+          content,
+          course_id: selectedCourseId || null,
+          course_topic: selectedTopic || null
+        }])
         .select()
         .single();
 
@@ -88,7 +128,7 @@ export default function CreateNote() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-4xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3">
           <Sparkles className="text-neutral-500" size={36} />
@@ -129,6 +169,38 @@ export default function CreateNote() {
             placeholder="e.g., The Laws of Thermodynamics"
             className="w-full p-4 rounded-2xl border-2 border-neutral-200 dark:border-neutral-700 focus:border-neutral-500 focus:ring-4 focus:ring-neutral-100 dark:focus:ring-neutral-800 transition-all outline-none font-bold text-xl bg-white dark:bg-[#3a3532]"
           />
+        </div>
+
+        {/* Linking Section */}
+        <div className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-800/50 p-6 rounded-2xl space-y-4">
+          <h3 className="font-bold text-blue-800 dark:text-blue-300 flex items-center gap-2">
+            <LinkIcon size={18} /> Link to Course Planner (Optional)
+          </h3>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <select 
+              value={selectedCourseId}
+              onChange={(e) => setSelectedCourseId(e.target.value)}
+              className="p-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-[#34302d] text-neutral-800 dark:text-neutral-200 outline-none font-medium flex-grow"
+            >
+              <option value="">-- Select Course Outline --</option>
+              {courses.map(c => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
+            </select>
+
+            {selectedCourseId && (
+              <select 
+                value={selectedTopic}
+                onChange={(e) => setSelectedTopic(e.target.value)}
+                className="p-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-[#34302d] text-neutral-800 dark:text-neutral-200 outline-none font-medium flex-grow"
+              >
+                <option value="">-- Select Topic --</option>
+                {availableTopics.map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
 
         <div>
