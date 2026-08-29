@@ -35,7 +35,7 @@ export default function EditScheduleModal({ schedule, courses, onClose, onUpdate
           <X size={24} />
         </button>
         
-        <h2 className="text-2xl font-bold text-neutral-900 mb-6">Edit Master Timetable</h2>
+        <h2 className="text-xl font-bold text-neutral-900 mb-6">Edit Master Timetable</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -74,7 +74,7 @@ export default function EditScheduleModal({ schedule, courses, onClose, onUpdate
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full bubbly-button bg-gradient-to-r from-orange-400 to-amber-500 text-white mt-6">
+          <button type="submit" disabled={loading} className="w-full modern-button bg-gradient-to-r from-orange-400 to-amber-500 text-white mt-6">
             {loading ? <Loader2 className="animate-spin mx-auto" size={24} /> : "Save Changes"}
           </button>
         </form>

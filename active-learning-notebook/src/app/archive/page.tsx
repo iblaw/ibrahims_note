@@ -45,7 +45,7 @@ export default function MyNotes() {
     <div className="max-w-5xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex sm:flex-row flex-col sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3 mb-2">
+          <h1 className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3 mb-2">
             <Library className="text-neutral-500" size={36} />
             My Notes
           </h1>
@@ -72,14 +72,16 @@ export default function MyNotes() {
         </div>
       ) : filteredNotes.length === 0 ? (
         <div className="text-center py-24 bg-neutral-100 dark:bg-neutral-900/50 rounded-3xl border-2 border-dashed border-neutral-300 dark:border-neutral-700">
-          <img src="/mascot/lumen_empty.jpg" alt="Lumen confused" className="w-48 h-48 mx-auto object-contain mb-4 rounded-3xl mix-blend-multiply dark:mix-blend-lighten" />
-          <h2 className="text-2xl font-bold text-neutral-700 dark:text-neutral-200 mb-2">
+          <div className="w-32 h-32 mx-auto bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center text-neutral-400 dark:text-neutral-500 mb-6 shadow-inner">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+          </div>
+          <h2 className="text-xl font-bold text-neutral-700 dark:text-neutral-200 mb-2">
             {search ? "No notes found matching your search" : "Your vault is empty"}
           </h2>
           <p className="text-neutral-500 dark:text-neutral-400 font-medium mb-8">
             Create your first AI-powered study note to fill up your vault.
           </p>
-          <Link href="/notes/new" className="bubbly-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900">
+          <Link href="/notes/new" className="modern-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900">
             Create Note
           </Link>
         </div>
@@ -89,7 +91,7 @@ export default function MyNotes() {
             <Link 
               key={note.id} 
               href={`/notes/${note.id}`}
-              className="bubbly-card group flex flex-col justify-between hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors p-6 bg-white dark:bg-[#34302d]"
+              className="modern-card group flex flex-col justify-between hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors p-6 bg-white dark:bg-[#34302d]"
             >
               <div className="relative">
                 <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity z-10">

@@ -34,8 +34,12 @@ export default function CommunityHub() {
   const [reqContent, setReqContent] = useState("");
   const [reqSubmitting, setReqSubmitting] = useState(false);
 
+  // Auth state
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
   useEffect(() => {
     fetchData();
+    fetchUser();
 
     const channel = supabase
       .channel("public:community_requests")
@@ -44,7 +48,6 @@ export default function CommunityHub() {
         { event: "INSERT", schema: "public", table: "community_requests" },
         (payload) => {
           setRequests((current) => [payload.new, ...current]);
-          // If they are on a different tab, we could show a toast notification here
         }
       )
       .subscribe();
@@ -53,6 +56,20 @@ export default function CommunityHub() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const fetchUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setCurrentUser(user);
+      // Set default username if they have one in metadata
+      if (user.user_metadata?.username) {
+        setReqUsername(user.user_metadata.username);
+      } else {
+        // Fallback to email prefix if no username
+        setReqUsername(user.email?.split("@")[0] || "Anonymous");
+      }
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -129,7 +146,7 @@ export default function CommunityHub() {
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
       <div className="flex sm:flex-row flex-col sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3 mb-2">
+          <h1 className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3 mb-2">
             <Users className="text-neutral-500" size={36} />
             Community Hub
           </h1>
@@ -141,7 +158,7 @@ export default function CommunityHub() {
         {activeTab === "files" && (
           <button 
             onClick={() => setShowModal(true)}
-            className="bubbly-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 flex items-center gap-2 justify-center w-fit shadow-neutral-300 dark:shadow-neutral-900"
+            className="modern-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 flex items-center gap-2 justify-center w-fit shadow-neutral-300 dark:shadow-neutral-900"
           >
             <UploadCloud size={20} />
             Share Material
@@ -184,7 +201,7 @@ export default function CommunityHub() {
         publicNotes.length === 0 ? (
           <div className="text-center py-24 bg-neutral-100 dark:bg-neutral-900/50 rounded-3xl border-2 border-dashed border-neutral-300 dark:border-neutral-700">
             <BookOpen size={48} className="mx-auto text-neutral-400 dark:text-neutral-500 mb-4" />
-            <h2 className="text-2xl font-bold text-neutral-700 dark:text-neutral-200 mb-2">
+            <h2 className="text-xl font-bold text-neutral-700 dark:text-neutral-200 mb-2">
               No public notes yet
             </h2>
             <p className="text-neutral-500 dark:text-neutral-400 font-medium">
@@ -197,7 +214,7 @@ export default function CommunityHub() {
               <Link 
                 key={note.id} 
                 href={`/notes/${note.id}`}
-                className="bubbly-card group flex flex-col justify-between hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors p-6 bg-white dark:bg-[#34302d]"
+                className="modern-card group flex flex-col justify-between hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors p-6 bg-white dark:bg-[#34302d]"
               >
                 <div>
                   <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
@@ -218,7 +235,7 @@ export default function CommunityHub() {
         publicCourses.length === 0 ? (
           <div className="text-center py-24 bg-neutral-100 dark:bg-neutral-900/50 rounded-3xl border-2 border-dashed border-neutral-300 dark:border-neutral-700">
             <BookOpen size={48} className="mx-auto text-neutral-400 dark:text-neutral-500 mb-4" />
-            <h2 className="text-2xl font-bold text-neutral-700 dark:text-neutral-200 mb-2">No courses published yet</h2>
+            <h2 className="text-xl font-bold text-neutral-700 dark:text-neutral-200 mb-2">No courses published yet</h2>
             <p className="text-neutral-500 dark:text-neutral-400 font-medium">Be the first to share your course outline with the community!</p>
           </div>
         ) : (
@@ -226,7 +243,7 @@ export default function CommunityHub() {
             {publicCourses.map((course) => (
               <div 
                 key={course.id} 
-                className="block bubbly-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6 hover:border-neutral-400 transition-colors"
+                className="block modern-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6 hover:border-neutral-400 transition-colors"
               >
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 line-clamp-2 pr-4">{course.title}</h3>
@@ -254,7 +271,7 @@ export default function CommunityHub() {
         files.length === 0 ? (
           <div className="text-center py-24 bg-neutral-100 dark:bg-neutral-900/50 rounded-3xl border-2 border-dashed border-neutral-300 dark:border-neutral-700">
             <FileText size={48} className="mx-auto text-neutral-400 dark:text-neutral-500 mb-4" />
-            <h2 className="text-2xl font-bold text-neutral-700 dark:text-neutral-200 mb-2">No materials shared yet</h2>
+            <h2 className="text-xl font-bold text-neutral-700 dark:text-neutral-200 mb-2">No materials shared yet</h2>
             <p className="text-neutral-500 dark:text-neutral-400 font-medium">Be the first to share a useful PDF!</p>
           </div>
         ) : (
@@ -265,7 +282,7 @@ export default function CommunityHub() {
                 href={file.file_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bubbly-card group flex flex-col justify-between hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors p-6 bg-white dark:bg-[#34302d]"
+                className="modern-card group flex flex-col justify-between hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors p-6 bg-white dark:bg-[#34302d]"
               >
                 <div>
                   <div className="bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-bold text-xs px-3 py-1 rounded-full w-fit mb-4">
@@ -290,23 +307,15 @@ export default function CommunityHub() {
               <input 
                 required
                 type="text" 
-                value={reqUsername}
-                onChange={e => setReqUsername(e.target.value)}
-                placeholder="Your Name"
-                className="p-4 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 focus:border-neutral-500 outline-none font-bold bg-transparent sm:w-1/4"
-              />
-              <input 
-                required
-                type="text" 
                 value={reqContent}
                 onChange={e => setReqContent(e.target.value)}
                 placeholder="E.g. Looking for Physics 101 Module 2 past questions..."
-                className="p-4 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 focus:border-neutral-500 outline-none font-bold bg-transparent sm:w-2/4 flex-grow"
+                className="p-4 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 focus:border-neutral-500 outline-none font-bold bg-transparent w-full flex-grow"
               />
               <button 
                 type="submit"
                 disabled={reqSubmitting}
-                className="bubbly-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900"
+                className="modern-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 shrink-0"
               >
                 {reqSubmitting ? "Posting..." : "Post"}
               </button>
@@ -339,7 +348,7 @@ export default function CommunityHub() {
       {showModal && (
         <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#34302d] w-full max-w-md rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-            <h2 className="text-2xl font-bold mb-6 text-neutral-800 dark:text-neutral-100">Share Material</h2>
+            <h2 className="text-xl font-bold mb-6 text-neutral-800 dark:text-neutral-100">Share Material</h2>
             <form onSubmit={handleShare} className="space-y-4">
               <div>
                 <label className="block text-sm font-bold mb-1">Title</label>
@@ -385,7 +394,7 @@ export default function CommunityHub() {
                 <button 
                   type="submit"
                   disabled={submitting}
-                  className="bubbly-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 py-2"
+                  className="modern-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 py-2"
                 >
                   {submitting ? "Sharing..." : "Share"}
                 </button>

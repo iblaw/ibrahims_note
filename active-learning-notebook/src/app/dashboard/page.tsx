@@ -50,7 +50,7 @@ export default function Dashboard() {
       setCourses(coursesData);
       
       const { data: schedulesData } = await supabase.from("schedules").select("*").eq("user_id", user.id);
-      setHasSchedules(schedulesData && schedulesData.length > 0);
+      setHasSchedules((schedulesData?.length ?? 0) > 0);
       
       let totalRequiredHoursWeekly = 0;
       let totalAllowedHoursWeekly = 0;
@@ -151,9 +151,11 @@ export default function Dashboard() {
       {/* Lumen Greeting Header */}
       <div className="bg-gradient-to-r from-orange-400 to-amber-500 rounded-3xl p-8 sm:p-10 flex flex-col sm:flex-row items-center gap-8 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-        <img src="/mascot/lumen_study.jpg" alt="Lumen Studying" className="w-32 h-32 rounded-full border-4 border-white shadow-2xl z-10" />
+        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center border-4 border-white dark:border-[#2a2624] shadow-2xl z-10 text-orange-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-16 sm:h-16"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+        </div>
         <div className="text-white z-10 text-center sm:text-left">
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-2 tracking-tight text-white drop-shadow-md">
+          <h1 className="text-xl sm:text-xl font-extrabold mb-2 tracking-tight text-white drop-shadow-md">
             {greeting}
           </h1>
           <p className="text-xl text-orange-50 font-medium max-w-2xl">
@@ -177,36 +179,36 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bubbly-card bg-neutral-100 dark:bg-neutral-900/50 border-2 border-neutral-200 dark:border-neutral-800 p-6">
+        <div className="modern-card bg-neutral-100 dark:bg-neutral-900/50 border-2 border-neutral-200 dark:border-neutral-800 p-6">
           <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400 mb-4 font-bold">
             <BrainCircuit size={20} /> Flashcards Due
           </div>
-          <div className="text-5xl font-extrabold text-neutral-800 dark:text-neutral-100">
+          <div className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100">
             {stats.cardsDue}
           </div>
         </div>
         {/* ... (other stats removed for brevity, keeping only essential ones) */}
-        <div className="bubbly-card bg-neutral-100 dark:bg-neutral-900/50 border-2 border-neutral-200 dark:border-neutral-800 p-6">
+        <div className="modern-card bg-neutral-100 dark:bg-neutral-900/50 border-2 border-neutral-200 dark:border-neutral-800 p-6">
           <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400 mb-4 font-bold">
             <GraduationCap size={20} /> Active Courses
           </div>
-          <div className="text-5xl font-extrabold text-neutral-800 dark:text-neutral-100">
+          <div className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100">
             {courses.length}
           </div>
         </div>
-        <div className="bubbly-card bg-neutral-100 dark:bg-neutral-900/50 border-2 border-neutral-200 dark:border-neutral-800 p-6">
+        <div className="modern-card bg-neutral-100 dark:bg-neutral-900/50 border-2 border-neutral-200 dark:border-neutral-800 p-6">
           <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400 mb-4 font-bold">
             <Book size={20} /> Total Notes
           </div>
-          <div className="text-5xl font-extrabold text-neutral-800 dark:text-neutral-100">
+          <div className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100">
             {stats.totalNotes}
           </div>
         </div>
-        <div className="bubbly-card bg-neutral-100 dark:bg-neutral-900/50 border-2 border-neutral-200 dark:border-neutral-800 p-6">
+        <div className="modern-card bg-neutral-100 dark:bg-neutral-900/50 border-2 border-neutral-200 dark:border-neutral-800 p-6">
           <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400 mb-4 font-bold">
             <Trophy size={20} /> Mastered
           </div>
-          <div className="text-5xl font-extrabold text-neutral-800 dark:text-neutral-100">
+          <div className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100">
             {stats.cardsMastered}
           </div>
         </div>
@@ -217,7 +219,7 @@ export default function Dashboard() {
           {/* Courses Manager */}
           <div>
             <div className="flex items-center justify-between mb-6">
-              <Link href="/courses" className="text-2xl font-bold text-neutral-800 dark:text-neutral-100 flex items-center gap-2 hover:text-neutral-600 transition-colors">
+              <Link href="/courses" className="text-xl font-bold text-neutral-800 dark:text-neutral-100 flex items-center gap-2 hover:text-neutral-600 transition-colors">
                 <Calendar size={24} /> Study Planner
               </Link>
               <div className="flex gap-2">
@@ -232,11 +234,11 @@ export default function Dashboard() {
             
             <div className="space-y-6">
               {todayTopics.length > 0 && (
-                <div className="bubbly-card bg-white border border-neutral-200/60 shadow-lg shadow-neutral-200/50 p-6 sm:p-8 relative overflow-hidden">
+                <div className="modern-card bg-white border border-neutral-200/60 shadow-lg shadow-neutral-200/50 p-6 sm:p-8 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                   
                   <div className="flex justify-between items-center mb-8 relative z-10">
-                    <h3 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2 text-neutral-800">
+                    <h3 className="text-xl sm:text-xl font-extrabold flex items-center gap-2 text-neutral-800">
                       <Clock size={24} className="text-orange-500" /> Today's Study Session
                     </h3>
                     <span className="text-xs sm:text-sm font-bold bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full shadow-sm">
@@ -272,14 +274,14 @@ export default function Dashboard() {
               )}
               
               {courses.length > 0 && !hasSchedules && (
-                <div className="bubbly-card bg-orange-50 border border-orange-200 p-8 text-center">
-                  <h3 className="text-2xl font-bold text-orange-800 mb-2">Create a Master Timetable!</h3>
+                <div className="modern-card bg-orange-50 border border-orange-200 p-8 text-center">
+                  <h3 className="text-xl font-bold text-orange-800 mb-2">Create a Master Timetable!</h3>
                   <p className="text-orange-700 mb-6 font-medium max-w-lg mx-auto">
                     You have course outlines ready, but you haven't organized them into a study schedule yet. Let's build your master timetable so you know exactly what to study each day.
                   </p>
                   <Link 
                     href="/courses" 
-                    className="inline-block bubbly-button bg-orange-500 text-white shadow-orange-500/30 px-8"
+                    className="inline-block modern-button bg-orange-500 text-white shadow-orange-500/30 px-8"
                   >
                     Go to Study Planner
                   </Link>
@@ -311,7 +313,7 @@ export default function Dashboard() {
                     <Link 
                       key={course.id} 
                       href={`/courses/${course.id}`}
-                      className="block bubbly-card bg-white border border-neutral-200 p-6 hover:border-neutral-400 transition-colors"
+                      className="block modern-card bg-white border border-neutral-200 p-6 hover:border-neutral-400 transition-colors"
                     >
                       <h3 className="text-xl font-bold text-neutral-800 mb-2">{course.title}</h3>
                       <div className="flex items-center gap-4 text-sm font-medium text-neutral-500 mb-4">
@@ -330,19 +332,19 @@ export default function Dashboard() {
 
         {/* Action Panel */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bubbly-card bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-8 shadow-xl">
-            <h2 className="text-2xl font-bold mb-4 drop-shadow-md">Ready to learn?</h2>
+          <div className="modern-card bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-8 shadow-xl">
+            <h2 className="text-xl font-bold mb-4 drop-shadow-md">Ready to learn?</h2>
             <p className="font-medium opacity-95 mb-8 drop-shadow-sm">
               {stats.cardsDue > 0 
                 ? `You have ${stats.cardsDue} flashcards due for review right now. Knock them out!` 
                 : "You are all caught up on your reviews! Time to learn something new."}
             </p>
             {stats.cardsDue > 0 ? (
-              <Link href="/review" className="bubbly-button w-full bg-white text-indigo-600 hover:text-indigo-700 flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20">
+              <Link href="/review" className="modern-button w-full bg-white text-indigo-600 hover:text-indigo-700 flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20">
                 Start Review Session <ArrowRight size={18} />
               </Link>
             ) : (
-              <Link href="/notes/new" className="bubbly-button w-full bg-white text-indigo-600 hover:text-indigo-700 flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20">
+              <Link href="/notes/new" className="modern-button w-full bg-white text-indigo-600 hover:text-indigo-700 flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20">
                 Create New Note <ArrowRight size={18} />
               </Link>
             )}
@@ -350,7 +352,7 @@ export default function Dashboard() {
 
           {/* AI Suggestions Engine */}
           {suggestedNote && (
-            <div className="bubbly-card bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800/50 p-6">
+            <div className="modern-card bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800/50 p-6">
               <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold mb-4">
                 <Book size={18} /> Suggested for Today
               </div>

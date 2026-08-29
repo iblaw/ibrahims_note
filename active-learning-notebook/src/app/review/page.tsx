@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { BrainCircuit, Check, ArrowRight, Loader2, Search, Play, Calendar } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 interface Flashcard {
@@ -13,7 +14,8 @@ interface Flashcard {
   interval: number;
   repetitions: number;
   next_review_date: string;
-  notes: {
+  topic?: string;
+  notes?: {
     title: string;
   };
 }
@@ -28,6 +30,9 @@ export default function ReviewPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [saving, setSaving] = useState(false);
+  
+  const searchParams = useSearchParams();
+  const initialTopic = searchParams.get("topic");
 
   useEffect(() => {
     fetchCards();
@@ -35,17 +40,36 @@ export default function ReviewPage() {
 
   const fetchCards = async () => {
     setLoading(true);
-    // Fetch all cards and join with notes to get the topic title
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    // Fetch all cards and join with notes as fallback
     const { data, error } = await supabase
       .from("flashcards")
       .select(`
         *,
         notes ( title )
       `)
+      .eq("user_id", user.id)
       .order("next_review_date", { ascending: true });
 
     if (!error && data) {
-      setAllCards(data as Flashcard[]);
+      const cards = data as Flashcard[];
+      setAllCards(cards);
+      
+      // Auto-start session if topic is in URL
+      if (initialTopic) {
+        const now = new Date().toISOString();
+        const due = cards.filter(c => c.next_review_date <= now && (c.topic === initialTopic || c.notes?.title === initialTopic));
+        if (due.length > 0) {
+          setSessionCards(due);
+          setCurrentIndex(0);
+          setRevealed(false);
+        }
+      }
     }
     setLoading(false);
   };
@@ -55,7 +79,7 @@ export default function ReviewPage() {
     let due = allCards.filter(c => c.next_review_date <= now);
     
     if (topicFilter) {
-      due = due.filter(c => c.notes?.title === topicFilter);
+      due = due.filter(c => c.topic === topicFilter || c.notes?.title === topicFilter);
     }
     
     setSessionCards(due);
@@ -118,7 +142,7 @@ export default function ReviewPage() {
     // Group by topic
     const grouped: Record<string, { total: number; due: number }> = {};
     allCards.forEach(card => {
-      const topic = card.notes?.title || "Unknown Topic";
+      const topic = card.topic || card.notes?.title || "General";
       if (!grouped[topic]) grouped[topic] = { total: 0, due: 0 };
       grouped[topic].total += 1;
       if (card.next_review_date <= now) grouped[topic].due += 1;
@@ -131,10 +155,10 @@ export default function ReviewPage() {
     const totalDue = allCards.filter(c => c.next_review_date <= now).length;
 
     return (
-      <div className="max-w-4xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="max-w-4xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
         <div className="flex sm:flex-row flex-col sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3 mb-2">
+            <h1 className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3 mb-2">
               <BrainCircuit className="text-neutral-500" size={36} />
               Review Hub
             </h1>
@@ -142,13 +166,21 @@ export default function ReviewPage() {
               You have <strong className="text-neutral-900 dark:text-white">{totalDue}</strong> cards due today across all topics.
             </p>
           </div>
-          <button 
-            onClick={() => startSession()}
-            disabled={totalDue === 0}
-            className="bubbly-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <Play size={18} /> Review All Due
-          </button>
+          <div className="flex items-center gap-2">
+            <Link 
+              href="/review/create"
+              className="modern-button bg-orange-100 text-orange-600 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:hover:bg-orange-900/50 flex items-center gap-2 shadow-none border border-orange-200 dark:border-orange-800/50"
+            >
+              + Create Deck
+            </Link>
+            <button 
+              onClick={() => startSession()}
+              disabled={totalDue === 0}
+              className="modern-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <Play size={18} /> Review All
+            </button>
+          </div>
         </div>
 
         <div className="relative">
@@ -164,9 +196,11 @@ export default function ReviewPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {topics.map(([topic, stats]) => (
-            <div key={topic} className="bubbly-card bg-white dark:bg-[#34302d] border-2 border-neutral-200 dark:border-neutral-700 p-6 flex flex-col justify-between">
+            <div key={topic} className="modern-card bg-white dark:bg-[#34302d] border-2 border-neutral-200 dark:border-neutral-700 p-6 flex flex-col justify-between">
               <div>
-                <h3 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 mb-4 line-clamp-2">{topic}</h3>
+                <div className="flex justify-between items-start gap-4 mb-4">
+                  <h3 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 line-clamp-2">{topic}</h3>
+                </div>
                 <div className="flex items-center gap-4 mb-6">
                   <span className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold px-3 py-1 rounded-full text-sm">
                     {stats.due} Due Today
@@ -176,18 +210,27 @@ export default function ReviewPage() {
                   </span>
                 </div>
               </div>
-              <button 
-                onClick={() => startSession(topic)}
-                disabled={stats.due === 0}
-                className="w-full bubbly-button bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-200 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {stats.due > 0 ? "Review Topic" : "All caught up"}
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => startSession(topic)}
+                  disabled={stats.due === 0}
+                  className="flex-1 modern-button bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-200 disabled:opacity-50 flex items-center justify-center gap-2 px-2"
+                >
+                  {stats.due > 0 ? "Review" : "Caught up"}
+                </button>
+                <Link
+                  href={`/review/manage?topic=${encodeURIComponent(topic)}`}
+                  className="flex-none modern-button bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 dark:bg-transparent dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 px-4"
+                  title="Edit Deck"
+                >
+                  Edit
+                </Link>
+              </div>
             </div>
           ))}
           {topics.length === 0 && (
             <div className="col-span-full text-center py-12 text-neutral-500 font-medium">
-              No topics found. Create a note to generate flashcards!
+              No topics found. Click "Create Deck" to get started!
             </div>
           )}
         </div>
@@ -202,7 +245,7 @@ export default function ReviewPage() {
         <div className="bg-neutral-100 dark:bg-neutral-900 w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-8 border-4 border-neutral-200 dark:border-neutral-800">
           <BrainCircuit className="text-green-500" size={64} />
         </div>
-        <h1 className="text-4xl font-extrabold text-neutral-800 dark:text-neutral-100">
+        <h1 className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100">
           Session Complete!
         </h1>
         <p className="text-xl text-neutral-500 dark:text-neutral-400 font-medium">
@@ -210,7 +253,7 @@ export default function ReviewPage() {
         </p>
         <button 
           onClick={() => setSessionCards(null)}
-          className="bubbly-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 inline-flex items-center gap-2 mt-8"
+          className="modern-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 inline-flex items-center gap-2 mt-8"
         >
           Back to Review Hub <ArrowRight size={20} />
         </button>
@@ -224,11 +267,11 @@ export default function ReviewPage() {
     <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3">
+          <h1 className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3">
             <BrainCircuit className="text-neutral-500" size={32} />
             Focus Session
           </h1>
-          <p className="text-neutral-500 font-bold mt-2">{card.notes?.title}</p>
+          <p className="text-neutral-500 font-bold mt-2">{card.topic || card.notes?.title || "General"}</p>
         </div>
         <button 
           onClick={() => setSessionCards(null)}
@@ -251,21 +294,21 @@ export default function ReviewPage() {
           className={`relative w-full h-full min-h-[400px] transition-transform duration-700 [transform-style:preserve-3d] ${revealed ? '[transform:rotateY(180deg)]' : ''}`}
         >
           {/* Front of Card */}
-          <div className="absolute inset-0 bubbly-card flex flex-col justify-center items-center text-center p-8 sm:p-16 border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-[#34302d] [backface-visibility:hidden]">
-            <p className="text-2xl sm:text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-8 leading-relaxed">
+          <div className="absolute inset-0 modern-card flex flex-col justify-center items-center text-center p-8 sm:p-16 border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-[#34302d] [backface-visibility:hidden]">
+            <p className="text-xl sm:text-xl font-bold text-neutral-800 dark:text-neutral-100 mb-8 leading-relaxed">
               {card.front}
             </p>
             <button 
               onClick={() => setRevealed(true)}
-              className="mt-8 bubbly-button bg-neutral-100 dark:bg-neutral-800 border-2 border-neutral-300 dark:border-neutral-600 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-200"
+              className="mt-8 modern-button bg-neutral-100 dark:bg-neutral-800 border-2 border-neutral-300 dark:border-neutral-600 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-200"
             >
               Reveal Answer
             </button>
           </div>
 
           {/* Back of Card */}
-          <div className="absolute inset-0 bubbly-card flex flex-col justify-center items-center text-center p-8 sm:p-16 border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-[#34302d] [backface-visibility:hidden] [transform:rotateY(180deg)]">
-            <p className="text-xl sm:text-2xl font-bold text-neutral-600 dark:text-neutral-300 mb-12">
+          <div className="absolute inset-0 modern-card flex flex-col justify-center items-center text-center p-8 sm:p-16 border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-[#34302d] [backface-visibility:hidden] [transform:rotateY(180deg)]">
+            <p className="text-xl sm:text-xl font-bold text-neutral-600 dark:text-neutral-300 mb-12">
               {card.back}
             </p>
             
@@ -273,21 +316,21 @@ export default function ReviewPage() {
               <button 
                 onClick={() => handleRate("hard")}
                 disabled={saving}
-                className="flex-1 sm:flex-none bubbly-button bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 hover:bg-red-200 font-bold px-8"
+                className="flex-1 sm:flex-none modern-button bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 hover:bg-red-200 font-bold px-8"
               >
                 Hard
               </button>
               <button 
                 onClick={() => handleRate("good")}
                 disabled={saving}
-                className="flex-1 sm:flex-none bubbly-button bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 hover:bg-green-200 font-bold px-8"
+                className="flex-1 sm:flex-none modern-button bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 hover:bg-green-200 font-bold px-8"
               >
                 Good
               </button>
               <button 
                 onClick={() => handleRate("easy")}
                 disabled={saving}
-                className="flex-1 sm:flex-none bubbly-button bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 hover:bg-blue-200 font-bold px-8"
+                className="flex-1 sm:flex-none modern-button bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 hover:bg-blue-200 font-bold px-8"
               >
                 Easy
               </button>

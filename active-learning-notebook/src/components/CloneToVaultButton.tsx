@@ -69,7 +69,7 @@ export default function CloneToVaultButton({ note, flashcards }: { note: any, fl
     <button 
       onClick={handleClone}
       disabled={cloning}
-      className="bubbly-button flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-xl shadow-orange-500/20"
+      className="modern-button flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-xl shadow-orange-500/20"
     >
       {cloning ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
       Clone to My Vault

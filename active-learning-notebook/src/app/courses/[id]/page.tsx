@@ -127,7 +127,7 @@ export default function CourseView({ params }: { params: Promise<{ id: string }>
                     type="text" 
                     value={editTitle}
                     onChange={e => setEditTitle(e.target.value)}
-                    className="w-full p-2 text-2xl font-extrabold rounded-lg border-2 border-neutral-300 dark:border-neutral-600 bg-transparent outline-none"
+                    className="w-full p-2 text-xl font-extrabold rounded-lg border-2 border-neutral-300 dark:border-neutral-600 bg-transparent outline-none"
                     autoFocus
                   />
                   <button onClick={saveTitle} className="p-2 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 rounded-lg hover:bg-green-200 transition-colors">
@@ -135,7 +135,7 @@ export default function CourseView({ params }: { params: Promise<{ id: string }>
                   </button>
                 </div>
               ) : (
-                <h1 className="text-4xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3 group mb-1">
+                <h1 className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3 group mb-1">
                   {course.title}
                   <button onClick={() => setIsEditingTitle(true)} className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-neutral-600 transition-all">
                     <Edit2 size={20} />
@@ -202,8 +202,8 @@ export default function CourseView({ params }: { params: Promise<{ id: string }>
       {view === "syllabus" ? (
         <div className="space-y-8">
           {course.syllabus.modules?.map((module: any, mIndex: number) => (
-          <div key={mIndex} className="bubbly-card bg-neutral-50 dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 p-6">
-            <h2 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100 mb-6">
+          <div key={mIndex} className="modern-card bg-neutral-50 dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 p-6">
+            <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 mb-6">
               {module.moduleTitle}
             </h2>
             
@@ -276,9 +276,9 @@ export default function CourseView({ params }: { params: Promise<{ id: string }>
               const allCompleted = weekTopics.every(t => t.completed);
 
               return (
-                <div key={wIndex} className={`bubbly-card p-6 border ${allCompleted ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-900/30' : 'bg-white dark:bg-[#34302d] border-neutral-200 dark:border-neutral-700'}`}>
+                <div key={wIndex} className={`modern-card p-6 border ${allCompleted ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-900/30' : 'bg-white dark:bg-[#34302d] border-neutral-200 dark:border-neutral-700'}`}>
                   <div className="flex justify-between items-center border-b-2 border-neutral-100 dark:border-neutral-800 pb-4 mb-4">
-                    <h2 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">
+                    <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100">
                       Week {wIndex + 1}
                     </h2>
                     <span className="text-sm font-bold text-neutral-500 bg-neutral-100 dark:bg-neutral-800 px-3 py-1 rounded-full">

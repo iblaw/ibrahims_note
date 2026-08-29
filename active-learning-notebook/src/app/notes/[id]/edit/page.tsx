@@ -104,13 +104,13 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Note Title"
-          className="text-4xl font-extrabold bg-transparent border-none outline-none text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-300 dark:placeholder:text-neutral-700 w-full"
+          className="text-xl font-extrabold bg-transparent border-none outline-none text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-300 dark:placeholder:text-neutral-700 w-full"
         />
         
         <button 
           onClick={handleSave}
           disabled={saving}
-          className="bubbly-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 flex items-center gap-2"
+          className="modern-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 flex items-center gap-2"
         >
           {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
           Save Changes

@@ -12,7 +12,7 @@ export default function FeynmanPrompt({ concept }: FeynmanPromptProps) {
   const [submitted, setSubmitted] = useState(false);
 
   return (
-    <div className="my-10 bubbly-card bg-neutral-50/50 dark:bg-neutral-900/30 border-neutral-200 dark:border-neutral-700/50">
+    <div className="my-10 modern-card bg-neutral-50/50 dark:bg-neutral-900/30 border-neutral-200 dark:border-neutral-700/50">
       <div className="flex items-center gap-3 mb-4 text-neutral-800 dark:text-neutral-200">
         <PenTool size={24} />
         <h3 className="text-xl font-bold">Feynman Challenge</h3>
@@ -38,7 +38,7 @@ export default function FeynmanPrompt({ concept }: FeynmanPromptProps) {
             <button
               onClick={() => setSubmitted(true)}
               disabled={text.length < 10}
-              className="bubbly-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 disabled:opacity-50 disabled:hover:-translate-y-0 disabled:cursor-not-allowed"
+              className="modern-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 disabled:opacity-50 disabled:hover:-translate-y-0 disabled:cursor-not-allowed"
             >
               Submit Explanation
             </button>

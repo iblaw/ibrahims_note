@@ -16,7 +16,7 @@ export default function GroupSection({ groupName, courses, onDeleteCourse, defau
   return (
     <div className="space-y-6">
       <div className="flex sm:flex-row flex-col sm:items-center justify-between gap-4 border-b-2 border-neutral-200 dark:border-neutral-800 pb-2">
-        <h2 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100 flex items-center gap-2">
+        <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 flex items-center gap-2">
           <Folder className="text-neutral-400" size={24} /> {groupName}
         </h2>
         
@@ -55,7 +55,7 @@ export default function GroupSection({ groupName, courses, onDeleteCourse, defau
               <Link 
                 key={course.id} 
                 href={`/courses/${course.id}`}
-                className="block bubbly-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6 hover:border-neutral-400 transition-colors relative group"
+                className="block modern-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6 hover:border-neutral-400 transition-colors relative group"
               >
                 <button 
                   onClick={(e) => onDeleteCourse(course.id, e)}
@@ -81,7 +81,9 @@ export default function GroupSection({ groupName, courses, onDeleteCourse, defau
         <div className="space-y-6">
           {timetable.length === 0 ? (
             <div className="text-center py-12 bg-green-50 dark:bg-green-900/10 rounded-3xl border border-green-200 dark:border-green-900/30">
-              <img src="/mascot/lumen_success.jpg" alt="Lumen celebrating" className="w-48 h-48 mx-auto object-contain mb-4 rounded-3xl mix-blend-multiply dark:mix-blend-lighten" />
+              <div className="w-32 h-32 mx-auto bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-500 mb-6 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+              </div>
               <h3 className="text-xl font-bold text-green-800 dark:text-green-400 mb-2">Goal Complete!</h3>
               <p className="text-green-700 dark:text-green-500">You have finished all topics in this course group.</p>
             </div>
@@ -92,7 +94,7 @@ export default function GroupSection({ groupName, courses, onDeleteCourse, defau
                 const dayHours = Math.round((dayMins / 60) * 10) / 10;
                 
                 return (
-                  <div key={dIndex} className="bubbly-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6">
+                  <div key={dIndex} className="modern-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6">
                     <div className="flex justify-between items-center mb-6">
                       <h3 className="text-xl font-bold text-neutral-800 dark:text-neutral-100">Study Session {dIndex + 1}</h3>
                       <span className="text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full">

@@ -65,7 +65,7 @@ export default function TopicStudyModal({ topic, onClose, onComplete }: { topic:
         
         <div className="mb-6 pr-8">
           <span className="text-sm font-bold text-orange-500 uppercase tracking-wider block mb-2">{topic.courseName}</span>
-          <h2 className="text-3xl font-extrabold text-neutral-900 leading-tight">{topic.topicTitle}</h2>
+          <h2 className="text-xl font-extrabold text-neutral-900 leading-tight">{topic.topicTitle}</h2>
           <p className="text-neutral-500 font-bold mt-2">Estimated study time: {topic.estimatedMinutes} minutes</p>
         </div>
         
@@ -100,7 +100,7 @@ export default function TopicStudyModal({ topic, onClose, onComplete }: { topic:
           <button 
             onClick={handleMarkComplete} 
             disabled={markingComplete}
-            className="w-full bubbly-button bg-green-500 hover:bg-green-600 text-white flex items-center justify-center gap-2 p-4 text-lg"
+            className="w-full modern-button bg-green-500 hover:bg-green-600 text-white flex items-center justify-center gap-2 p-4 text-lg"
           >
             {markingComplete ? <Loader2 className="animate-spin" /> : <CheckCircle2 />}
             Mark Topic as Complete

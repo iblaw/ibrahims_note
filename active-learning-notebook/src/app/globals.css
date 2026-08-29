@@ -75,33 +75,28 @@
 
   --color-background: var(--color-neutral-50);
   --color-foreground: var(--color-neutral-900);
-  --font-sans: var(--font-fredoka);
+  --font-sans: var(--font-inter);
 }
 
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: var(--font-sans), ui-rounded, system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   color-scheme: light;
-  background-image: 
-    radial-gradient(at 0% 0%, hsla(28, 100%, 74%, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(189, 100%, 56%, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(355, 100%, 93%, 0.15) 0px, transparent 50%);
-  background-attachment: fixed;
   min-height: 100vh;
 }
 
 /* Premium modern card styles */
-.bubbly-card {
-  @apply bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)] border border-white/60 p-6 transition-all duration-500 ease-out;
+.modern-card {
+  @apply bg-white rounded-lg shadow-sm border border-neutral-200 p-6 transition-all duration-300 ease-out;
 }
-.bubbly-card:hover {
-  @apply shadow-[0_16px_60px_-15px_rgba(0,0,0,0.15)] border-white/80 -translate-y-1;
+.modern-card:hover {
+  @apply shadow-md border-neutral-300;
 }
 
-.bubbly-button {
-  @apply px-6 py-3 rounded-full font-bold transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/20 active:scale-95 active:translate-y-0 active:shadow-none shadow-md;
+.modern-button {
+  @apply px-4 py-2 rounded-md font-semibold transition-all duration-200 shadow-sm hover:shadow active:scale-95 flex items-center justify-center gap-2;
 }
 
 .perspective-1000 {

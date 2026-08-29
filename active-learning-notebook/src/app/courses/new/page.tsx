@@ -96,14 +96,14 @@ export default function CreateCourse() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-4xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3">
+        <h1 className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3">
           <GraduationCap className="text-neutral-500" size={36} />
           Plan New Course
         </h1>
         <button
           onClick={handleSave}
           disabled={isSubmitting || !content || !targetDate}
-          className="bubbly-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 disabled:opacity-50 flex items-center gap-2 justify-center"
+          className="modern-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 disabled:opacity-50 flex items-center gap-2 justify-center"
         >
           {isSubmitting && <Loader2 className="animate-spin" size={20} />}
           {isSubmitting ? "Generating Plan..." : "Generate Study Plan"}
@@ -124,7 +124,7 @@ export default function CreateCourse() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bubbly-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6">
+        <div className="modern-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6">
           <label className="flex items-center gap-2 text-sm font-bold mb-4 text-neutral-700 dark:text-neutral-300">
             <Calendar size={18} /> Target Completion Date
           </label>
@@ -137,7 +137,7 @@ export default function CreateCourse() {
           />
         </div>
         
-        <div className="bubbly-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6">
+        <div className="modern-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6">
           <label className="flex items-center gap-2 text-sm font-bold mb-4 text-neutral-700 dark:text-neutral-300">
             <Clock size={18} /> Weekly Hours Commitment
           </label>

@@ -61,7 +61,7 @@ export default function CoursesManager() {
       <div className="flex flex-col gap-6">
         <div className="flex sm:flex-row flex-col sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-extrabold text-neutral-800 flex items-center gap-3 mb-2">
+            <h1 className="text-xl font-extrabold text-neutral-800 flex items-center gap-3 mb-2">
               <GraduationCap className="text-neutral-500" size={36} />
               Study Planner
             </h1>
@@ -74,14 +74,14 @@ export default function CoursesManager() {
             {activeTab === "outlines" ? (
               <Link 
                 href="/courses/new" 
-                className="bubbly-button bg-neutral-800 text-white flex items-center gap-2 shadow-neutral-300"
+                className="modern-button bg-neutral-800 text-white flex items-center gap-2 shadow-neutral-300"
               >
                 <Plus size={20} /> Add Outline
               </Link>
             ) : (
               <button 
                 onClick={() => setShowScheduleModal(true)}
-                className="bubbly-button bg-neutral-800 text-white flex items-center gap-2 shadow-neutral-300"
+                className="modern-button bg-neutral-800 text-white flex items-center gap-2 shadow-neutral-300"
               >
                 <Plus size={20} /> Create Timetable
               </button>
@@ -112,9 +112,11 @@ export default function CoursesManager() {
       ) : activeTab === "outlines" ? (
         courses.length === 0 ? (
           <div className="text-center py-24 bg-neutral-100 rounded-3xl border-2 border-dashed border-neutral-300">
-            <img src="/mascot/lumen_empty.jpg" alt="Lumen looking for courses" className="w-48 h-48 mx-auto object-contain mb-4 rounded-3xl mix-blend-multiply" />
-            <h2 className="text-2xl font-bold text-neutral-700 mb-2">No course outlines yet</h2>
-            <Link href="/courses/new" className="bubbly-button bg-neutral-800 text-white shadow-neutral-300 inline-block mt-4">
+            <div className="w-32 h-32 mx-auto bg-neutral-200 rounded-full flex items-center justify-center text-neutral-400 mb-6 shadow-inner">
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+            </div>
+            <h2 className="text-xl font-bold text-neutral-700 mb-2">No course outlines yet</h2>
+            <Link href="/courses/new" className="modern-button bg-neutral-800 text-white shadow-neutral-300 inline-block mt-4">
               Create First Outline
             </Link>
           </div>
@@ -133,10 +135,12 @@ export default function CoursesManager() {
       ) : (
         schedules.length === 0 ? (
           <div className="text-center py-24 bg-neutral-100 rounded-3xl border-2 border-dashed border-neutral-300">
-            <img src="/mascot/lumen_empty.jpg" alt="Lumen looking for courses" className="w-48 h-48 mx-auto object-contain mb-4 rounded-3xl mix-blend-multiply" />
-            <h2 className="text-2xl font-bold text-neutral-700 mb-2">No timetables yet</h2>
+            <div className="w-32 h-32 mx-auto bg-neutral-200 rounded-full flex items-center justify-center text-neutral-400 mb-6 shadow-inner">
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+            </div>
+            <h2 className="text-xl font-bold text-neutral-700 mb-2">No timetables yet</h2>
             <p className="text-neutral-500 font-medium max-w-md mx-auto mb-8">Group your courses together to generate an optimized study schedule.</p>
-            <button onClick={() => setShowScheduleModal(true)} className="bubbly-button bg-neutral-800 text-white shadow-neutral-300 inline-block mt-4">
+            <button onClick={() => setShowScheduleModal(true)} className="modern-button bg-neutral-800 text-white shadow-neutral-300 inline-block mt-4">
               Create Master Timetable
             </button>
           </div>

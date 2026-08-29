@@ -99,7 +99,7 @@ export default function ProfilePage() {
         <div className="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center shadow-sm">
           <Sparkles size={24} />
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-800 tracking-tight">
+        <h1 className="text-xl sm:text-xl font-extrabold text-neutral-800 tracking-tight">
           Hey there, {displayName}! ⚡
         </h1>
       </div>
@@ -107,10 +107,10 @@ export default function ProfilePage() {
       <div className="grid md:grid-cols-3 gap-6">
         {/* User Card */}
         <div className="md:col-span-1 space-y-6">
-          <div className="bubbly-card relative overflow-hidden flex flex-col items-center text-center">
+          <div className="modern-card relative overflow-hidden flex flex-col items-center text-center">
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             
-            <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30 mb-4 z-10 text-white font-extrabold text-4xl uppercase">
+            <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30 mb-4 z-10 text-white font-extrabold text-xl uppercase">
               {displayName.charAt(0)}
             </div>
             
@@ -173,29 +173,29 @@ export default function ProfilePage() {
 
         {/* Stats Grid */}
         <div className="md:col-span-2 space-y-6">
-          <h3 className="text-2xl font-bold text-neutral-800">Learning Statistics</h3>
+          <h3 className="text-xl font-bold text-neutral-800">Learning Statistics</h3>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="bubbly-card flex items-center gap-4">
+            <div className="modern-card flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
                 <Book size={24} />
               </div>
               <div>
                 <p className="text-neutral-500 font-bold text-sm">Total Notes</p>
-                <p className="text-3xl font-extrabold text-neutral-900">{stats.notes}</p>
+                <p className="text-xl font-extrabold text-neutral-900">{stats.notes}</p>
               </div>
             </div>
             
-            <div className="bubbly-card flex items-center gap-4">
+            <div className="modern-card flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
                 <Calendar size={24} />
               </div>
               <div>
                 <p className="text-neutral-500 font-bold text-sm">Course Outlines</p>
-                <p className="text-3xl font-extrabold text-neutral-900">{stats.courses}</p>
+                <p className="text-xl font-extrabold text-neutral-900">{stats.courses}</p>
               </div>
             </div>
 
-            <div className="bubbly-card sm:col-span-2 flex items-center gap-4 relative overflow-hidden border-orange-200 bg-orange-50/50">
+            <div className="modern-card sm:col-span-2 flex items-center gap-4 relative overflow-hidden border-orange-200 bg-orange-50/50">
               <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none">
                 <Trophy size={120} className="text-orange-400 -mb-8 -mr-8" />
               </div>
@@ -204,7 +204,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-orange-700 font-bold text-sm">Flashcards in Vault</p>
-                <p className="text-4xl font-extrabold text-orange-600">{stats.flashcards}</p>
+                <p className="text-xl font-extrabold text-orange-600">{stats.flashcards}</p>
               </div>
             </div>
           </div>

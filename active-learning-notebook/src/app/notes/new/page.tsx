@@ -20,7 +20,8 @@ CRITICAL INSTRUCTION: You must output the content in Markdown format, but use th
 
 3. Chunking & In-Text Quizzes
 - Break the document into logical segments (2-3 paragraphs max).
-- At the end of EVERY segment, insert a quiz EXACTLY like this:
+- At the end of EVERY segment, you MUST insert a set of quizzes (at least 3-4 quizzes per section) to comprehensively test the user's understanding of that segment.
+- Format EACH quiz EXACTLY like this:
 <Quiz question="[Question text]" options="[Option 1] | [Option 2] | [Option 3]" answer="[Exact text of correct option]" />
 
 4. Segment Challenge (Feynman Prompt)
@@ -85,11 +86,14 @@ export default function CreateNote() {
     setIsSubmitting(true);
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+
       const { data: note, error: noteError } = await supabase
         .from("notes")
         .insert([{ 
           title, 
           content,
+          user_id: user?.id,
           course_id: selectedCourseId || null,
           course_topic: selectedTopic || null
         }])
@@ -105,8 +109,14 @@ export default function CreateNote() {
       while ((match = regex.exec(content)) !== null) {
         extractedCards.push({
           note_id: note.id,
+          user_id: user?.id,
           front: match[1],
           back: match[2],
+          topic: selectedTopic || null,
+          ease_factor: 2.5,
+          interval: 0,
+          repetitions: 0,
+          next_review_date: new Date().toISOString()
         });
       }
 
@@ -119,9 +129,9 @@ export default function CreateNote() {
       }
 
       router.push(`/notes/${note.id}`);
-    } catch (error) {
-      console.error("Error saving note:", error);
-      alert("Failed to save note. Please try again.");
+    } catch (error: any) {
+      console.error("Error saving note:", JSON.stringify(error, null, 2));
+      alert(`Failed to save note: ${error.message || JSON.stringify(error)}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -130,14 +140,14 @@ export default function CreateNote() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-4xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3">
+        <h1 className="text-xl font-extrabold text-neutral-800 dark:text-neutral-100 flex items-center gap-3">
           <Sparkles className="text-neutral-500" size={36} />
           Create New Note
         </h1>
         <button
           onClick={handleSave}
           disabled={isSubmitting || !title || !content}
-          className="bubbly-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 disabled:opacity-50 flex items-center gap-2 justify-center"
+          className="modern-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 disabled:opacity-50 flex items-center gap-2 justify-center"
         >
           {isSubmitting && <Loader2 className="animate-spin" size={20} />}
           {isSubmitting ? "Saving..." : "Save Note"}
