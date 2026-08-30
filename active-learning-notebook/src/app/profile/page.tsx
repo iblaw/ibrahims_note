@@ -208,6 +208,43 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+
+          <h3 className="text-xl font-bold text-neutral-800 mt-10">App Appearance</h3>
+          <div className="modern-card space-y-4">
+            <p className="font-bold text-neutral-600 text-sm">App Font Style</p>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {[
+                { id: "playful", label: "Playful" },
+                { id: "casual", label: "Casual" },
+                { id: "classic", label: "Classic" },
+                { id: "serious", label: "Serious" },
+                { id: "mono", label: "Mono" },
+              ].map(font => (
+                <button
+                  key={font.id}
+                  onClick={() => {
+                    localStorage.setItem("lumen-font", font.id);
+                    document.documentElement.setAttribute("data-font", font.id);
+                  }}
+                  className="p-3 border-2 border-neutral-200 rounded-xl font-bold hover:border-orange-400 hover:bg-orange-50 transition-colors focus:border-orange-500 focus:bg-orange-50 outline-none"
+                  style={{
+                    fontFamily: 
+                      font.id === "playful" ? "var(--font-fredoka)" :
+                      font.id === "casual" ? "var(--font-nunito)" :
+                      font.id === "classic" ? "var(--font-merriweather)" :
+                      font.id === "serious" ? "var(--font-inter)" :
+                      "var(--font-jetbrains)"
+                  }}
+                >
+                  {font.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs font-medium text-neutral-400 mt-2">
+              Select a font to instantly update the look and feel of the entire app. Your preference is saved automatically!
+            </p>
+          </div>
+
         </div>
       </div>
     </div>

@@ -75,8 +75,17 @@
 
   --color-background: var(--color-neutral-50);
   --color-foreground: var(--color-neutral-900);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-current);
 }
+
+:root {
+  --font-current: var(--font-fredoka); /* Playful is default */
+}
+:root[data-font="serious"] { --font-current: var(--font-inter); }
+:root[data-font="casual"] { --font-current: var(--font-nunito); }
+:root[data-font="classic"] { --font-current: var(--font-merriweather); }
+:root[data-font="playful"] { --font-current: var(--font-fredoka); }
+:root[data-font="mono"] { --font-current: var(--font-jetbrains); }
 
 body {
   background: var(--color-background);

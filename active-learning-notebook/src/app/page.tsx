@@ -1,7 +1,16 @@
 import Link from "next/link";
-import { BookOpen, BrainCircuit, Library, PenSquare, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="flex flex-col items-center justify-center space-y-12 py-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
       
