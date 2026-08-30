@@ -51,6 +51,17 @@ export default function CreateNote() {
 
   useEffect(() => {
     fetchCourses();
+    
+    // Auto-fill from query params if navigated from the master timetable
+    const searchParams = new URLSearchParams(window.location.search);
+    const courseIdParam = searchParams.get('courseId');
+    const topicParam = searchParams.get('topic');
+
+    if (courseIdParam) setSelectedCourseId(courseIdParam);
+    if (topicParam) {
+      setSelectedTopic(topicParam);
+      setTitle(topicParam); // Auto-title the note with the topic name
+    }
   }, []);
 
   const fetchCourses = async () => {

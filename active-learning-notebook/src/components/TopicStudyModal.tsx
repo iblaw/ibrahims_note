@@ -92,7 +92,10 @@ export default function TopicStudyModal({ topic, onClose, onComplete }: { topic:
               <p className="text-neutral-500 font-medium text-sm">No community notes found for this topic yet. Be the first to create one!</p>
             )}
             
-            <Link href="/notes/new" className="mt-4 block text-center bg-white text-blue-700 font-bold py-2 rounded-xl hover:bg-blue-100 transition-colors border border-blue-200">
+            <Link 
+              href={`/notes/new?courseId=${topic.courseId}&topic=${encodeURIComponent(topic.topicTitle)}`} 
+              className="mt-4 block text-center bg-white text-blue-700 font-bold py-2 rounded-xl hover:bg-blue-100 transition-colors border border-blue-200"
+            >
               Generate AI Notes for this Topic
             </Link>
           </div>
