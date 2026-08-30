@@ -30,8 +30,20 @@ export default async function RootLayout({
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className={`${inter.variable} ${nunito.variable} ${merriweather.variable} ${fredoka.variable} ${jetbrains.variable} antialiased min-h-screen flex flex-col font-sans bg-neutral-50`}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${nunito.variable} ${merriweather.variable} ${fredoka.variable} ${jetbrains.variable}`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const savedFont = localStorage.getItem("lumen-font") || "playful";
+                document.documentElement.setAttribute("data-font", savedFont);
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
+      <body suppressHydrationWarning className="antialiased min-h-screen flex flex-col font-sans bg-neutral-50">
         <FontProvider>
           <NavBar user={user} />
           {/* Main Content */}
