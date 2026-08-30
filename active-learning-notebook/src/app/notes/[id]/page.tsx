@@ -91,7 +91,13 @@ export default async function ViewNote({ params }: { params: { id: string } }) {
             <QuickAssignDropdown noteId={id} currentTopic={note.course_topic} />
           </div>
         )}
-        <NoteReaderContainer mdxSource={mdxSource} />
+        <NoteReaderContainer 
+          mdxSource={mdxSource} 
+          noteId={id} 
+          courseId={note.course_id} 
+          topicTitle={note.course_topic} 
+          isOwner={isOwner} 
+        />
       </div>
       
       {/* Action Buttons: Quiz and Flashcards */}
