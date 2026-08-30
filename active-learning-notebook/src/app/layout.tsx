@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { BookOpen, BrainCircuit, Library, Users, Calendar, User } from "lucide-react";
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -38,6 +39,7 @@ export default async function RootLayout({
         <footer className="w-full text-center py-8 text-neutral-500 font-medium text-sm border-t border-neutral-200 dark:border-neutral-800 mt-auto bg-white dark:bg-[#34302d]">
           <p>&copy; {new Date().getFullYear()} Lumen. Built with ❤️ for better learning.</p>
         </footer>
+        <Analytics />
       </body>
     </html>
   );
