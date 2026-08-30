@@ -71,13 +71,17 @@ export default function CreateCourse() {
 
       if (!title) throw new Error("Course title not found in JSON.");
 
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("You must be logged in to create a course.");
+
       const { data: course, error } = await supabase
         .from("courses")
         .insert([{ 
           title, 
           syllabus: syllabusJson,
           target_completion_date: new Date(targetDate).toISOString(),
-          weekly_hours_commitment: weeklyHours
+          weekly_hours_commitment: weeklyHours,
+          user_id: user.id
         }])
         .select()
         .single();

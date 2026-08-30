@@ -53,6 +53,9 @@ export default function MyNotes() {
             Search your personal vault of AI-generated study materials.
           </p>
         </div>
+        <Link href="/notes/new" className="modern-button bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 shadow-neutral-300 dark:shadow-neutral-900 shrink-0">
+          + Create Note
+        </Link>
       </div>
 
       <div className="relative">
