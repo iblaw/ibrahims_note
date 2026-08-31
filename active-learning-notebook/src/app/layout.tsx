@@ -3,7 +3,7 @@ import { Inter, Nunito, Merriweather, Fredoka, JetBrains_Mono } from "next/font/
 import "./globals.css";
 import Link from "next/link";
 import { BookOpen, BrainCircuit, Library, Users, Calendar, User } from "lucide-react";
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@vercel/analytics/react';
 import FontProvider from "@/components/FontProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: 'swap' });
