@@ -4,9 +4,13 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import QuizSession from "./QuizSession";
 
+import ShareButton from "@/components/ShareButton";
+
 export default async function NoteQuizPage({ params }: { params: { id: string } }) {
   const { id } = await params;
   const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: note, error } = await supabase
     .from("notes")
@@ -27,17 +31,19 @@ export default async function NoteQuizPage({ params }: { params: { id: string } 
     quizzes.push({
       question: match[1],
       options: match[2].split("|").map(opt => opt.trim()),
-      answer: match[3].trim()
+      answer: match[3].trim(),
+      note_id: id
     });
   }
 
   return (
     <div className="max-w-4xl mx-auto pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
+      <div className="flex justify-between items-center mb-8">
         <Link href={`/notes/${id}`} className="inline-flex items-center gap-2 text-neutral-500 hover:text-orange-500 font-bold transition-colors">
           <ArrowLeft size={20} />
           Back to Note
         </Link>
+        <ShareButton path={`/notes/${id}/quiz`} title="Share Quiz" noteId={id} />
       </div>
 
       <div className="mb-12">
@@ -60,7 +66,7 @@ export default async function NoteQuizPage({ params }: { params: { id: string } 
           </p>
         </div>
       ) : (
-        <QuizSession quizzes={quizzes} />
+        <QuizSession quizzes={quizzes} isGuest={!user} />
       )}
     </div>
   );

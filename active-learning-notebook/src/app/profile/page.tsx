@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { User, Mail, Calendar, Trophy, Book, LogOut, Loader2, Sparkles } from "lucide-react";
+import { User, Mail, Calendar, Trophy, Book, LogOut, Loader2, Sparkles, Clock, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
@@ -243,6 +243,135 @@ export default function ProfilePage() {
             <p className="text-xs font-medium text-neutral-400 mt-2">
               Select a font to instantly update the look and feel of the entire app. Your preference is saved automatically!
             </p>
+          </div>
+
+          <h3 className="text-xl font-bold text-neutral-800 mt-10">Study Preferences</h3>
+          <div className="modern-card space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-neutral-700 mb-2">Profession / Study Area</label>
+                <input 
+                  type="text" 
+                  value={profile?.profession || ""}
+                  onChange={(e) => setProfile({ ...profile, profession: e.target.value })}
+                  onBlur={() => supabase.from("profiles").update({ profession: profile?.profession }).eq("id", user.id)}
+                  className="w-full p-3 rounded-xl border-2 border-neutral-200 focus:border-orange-500 bg-neutral-50 font-bold text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-neutral-700 mb-2">Daily Study Goal (Hours)</label>
+                <input 
+                  type="number" min="0.5" step="0.5"
+                  value={profile?.daily_study_goal_hours || 2}
+                  onChange={(e) => setProfile({ ...profile, daily_study_goal_hours: parseFloat(e.target.value) })}
+                  onBlur={() => supabase.from("profiles").update({ daily_study_goal_hours: profile?.daily_study_goal_hours }).eq("id", user.id)}
+                  className="w-full p-3 rounded-xl border-2 border-neutral-200 focus:border-orange-500 bg-neutral-50 font-bold text-sm"
+                />
+              </div>
+            </div>
+            
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-neutral-700 mb-2">Note Length</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button 
+                    onClick={() => {
+                      setProfile({ ...profile, note_length_preference: "detailed" });
+                      supabase.from("profiles").update({ note_length_preference: "detailed" }).eq("id", user.id);
+                    }}
+                    className={`p-3 rounded-xl border-2 font-bold text-sm text-center transition-colors ${profile?.note_length_preference === "detailed" ? "border-blue-500 bg-blue-50 text-blue-800" : "border-neutral-200 text-neutral-600 hover:bg-neutral-50"}`}
+                  >
+                    Long & Detailed
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setProfile({ ...profile, note_length_preference: "summary" });
+                      supabase.from("profiles").update({ note_length_preference: "summary" }).eq("id", user.id);
+                    }}
+                    className={`p-3 rounded-xl border-2 font-bold text-sm text-center transition-colors ${profile?.note_length_preference === "summary" ? "border-blue-500 bg-blue-50 text-blue-800" : "border-neutral-200 text-neutral-600 hover:bg-neutral-50"}`}
+                  >
+                    Short & Concise
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-neutral-700 mb-2">Primary Goals</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Exam, Career, General (comma separated)"
+                  value={profile?.primary_learning_goal || ""}
+                  onChange={(e) => setProfile({ ...profile, primary_learning_goal: e.target.value })}
+                  onBlur={() => supabase.from("profiles").update({ primary_learning_goal: profile?.primary_learning_goal }).eq("id", user.id)}
+                  className="w-full p-3 rounded-xl border-2 border-neutral-200 focus:border-orange-500 bg-neutral-50 font-bold text-sm"
+                />
+                <p className="text-xs text-neutral-500 mt-1">Comma-separated list of your study goals.</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-neutral-700 mb-2">Quiz Timing Preference</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={() => {
+                    setProfile({ ...profile, quiz_preference: "in_between" });
+                    supabase.from("profiles").update({ quiz_preference: "in_between" }).eq("id", user.id);
+                  }}
+                  className={`p-3 rounded-xl border-2 font-bold text-sm text-left transition-colors ${profile?.quiz_preference === "in_between" ? "border-orange-500 bg-orange-50 text-orange-800" : "border-neutral-200 text-neutral-600 hover:bg-neutral-50"}`}
+                >
+                  <div className="mb-1 text-orange-500"><Clock size={18} /></div>
+                  In-between sections
+                </button>
+                <button 
+                  onClick={() => {
+                    setProfile({ ...profile, quiz_preference: "at_end" });
+                    supabase.from("profiles").update({ quiz_preference: "at_end" }).eq("id", user.id);
+                  }}
+                  className={`p-3 rounded-xl border-2 font-bold text-sm text-left transition-colors ${profile?.quiz_preference === "at_end" ? "border-orange-500 bg-orange-50 text-orange-800" : "border-neutral-200 text-neutral-600 hover:bg-neutral-50"}`}
+                >
+                  <div className="mb-1 text-orange-500"><BookOpen size={18} /></div>
+                  At the end of the note
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-neutral-700 mb-2">Mnemonics Preference</label>
+              <div className="grid sm:grid-cols-3 gap-3">
+                <button 
+                  onClick={() => {
+                    setProfile({ ...profile, mnemonic_preference: "acronyms" });
+                    supabase.from("profiles").update({ mnemonic_preference: "acronyms" }).eq("id", user.id);
+                  }}
+                  className={`p-3 rounded-xl border-2 text-left transition-colors ${profile?.mnemonic_preference === "acronyms" ? "border-purple-500 bg-purple-50" : "border-neutral-200 hover:bg-neutral-50"}`}
+                >
+                  <div className="font-bold text-neutral-800 text-sm">Acronyms & Acrostics</div>
+                  <div className="text-xs text-neutral-500 mt-1 font-medium">e.g. ROYGBIV</div>
+                </button>
+                
+                <button 
+                  onClick={() => {
+                    setProfile({ ...profile, mnemonic_preference: "story" });
+                    supabase.from("profiles").update({ mnemonic_preference: "story" }).eq("id", user.id);
+                  }}
+                  className={`p-3 rounded-xl border-2 text-left transition-colors ${profile?.mnemonic_preference === "story" ? "border-purple-500 bg-purple-50" : "border-neutral-200 hover:bg-neutral-50"}`}
+                >
+                  <div className="font-bold text-neutral-800 text-sm">Story & Rhymes</div>
+                  <div className="text-xs text-neutral-500 mt-1 font-medium">e.g. In 1492, Columbus...</div>
+                </button>
+                
+                <button 
+                  onClick={() => {
+                    setProfile({ ...profile, mnemonic_preference: "mixed" });
+                    supabase.from("profiles").update({ mnemonic_preference: "mixed" }).eq("id", user.id);
+                  }}
+                  className={`p-3 rounded-xl border-2 text-left transition-colors ${profile?.mnemonic_preference === "mixed" ? "border-purple-500 bg-purple-50" : "border-neutral-200 hover:bg-neutral-50"}`}
+                >
+                  <div className="font-bold text-neutral-800 text-sm">Mix of Both</div>
+                  <div className="text-xs text-neutral-500 mt-1 font-medium">Lumen picks what works best</div>
+                </button>
+              </div>
+            </div>
           </div>
 
         </div>

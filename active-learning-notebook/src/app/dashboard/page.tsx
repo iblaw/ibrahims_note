@@ -19,7 +19,7 @@ export default function Dashboard() {
   const [suggestedNote, setSuggestedNote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedTopic, setSelectedTopic] = useState<any>(null);
-  const [burnoutWarning, setBurnoutWarning] = useState<{ active: boolean; required: number; allowed: number } | null>(null);
+  const [burnoutWarning, setBurnoutWarning] = useState<{ active: boolean; required: number; allowed: number, dismissed?: boolean } | null>(null);
   const [recentNotes, setRecentNotes] = useState<any[]>([]);
   const [hasSchedules, setHasSchedules] = useState(false);
 
@@ -165,15 +165,23 @@ export default function Dashboard() {
       </div>
 
       {/* Burnout Warning */}
-      {burnoutWarning?.active && (
-        <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-900/50 p-6 rounded-2xl flex items-start gap-4">
-          <AlertTriangle className="text-red-500 shrink-0" size={32} />
-          <div>
-            <h3 className="text-xl font-bold text-red-800 dark:text-red-300 mb-1">Burnout Warning 🔥</h3>
-            <p className="text-red-700 dark:text-red-400 font-medium">
-              You committed to <strong>{burnoutWarning.allowed} hours/week</strong> of study, but to hit your deadlines you need to study <strong>{burnoutWarning.required} hours/week</strong>. Consider pushing your deadlines back or increasing your weekly commitment!
-            </p>
+      {burnoutWarning?.active && !burnoutWarning.dismissed && (
+        <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-900/50 p-6 rounded-2xl flex items-start justify-between gap-4">
+          <div className="flex gap-4">
+            <AlertTriangle className="text-red-500 shrink-0" size={32} />
+            <div>
+              <h3 className="text-xl font-bold text-red-800 dark:text-red-300 mb-1">Burnout Warning 🔥</h3>
+              <p className="text-red-700 dark:text-red-400 font-medium">
+                You committed to <strong>{burnoutWarning.allowed} hours/week</strong> of study, but to hit your deadlines you need to study <strong>{burnoutWarning.required} hours/week</strong>. Consider pushing your deadlines back or increasing your weekly commitment!
+              </p>
+            </div>
           </div>
+          <button 
+            onClick={() => setBurnoutWarning({ ...burnoutWarning, dismissed: true })}
+            className="text-red-400 hover:text-red-700 dark:hover:text-red-200 transition-colors p-1"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
         </div>
       )}
 

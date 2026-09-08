@@ -7,6 +7,8 @@ import { ArrowLeft, CalendarDays, Edit2, Copy, BrainCircuit, Play, PenTool } fro
 import PublishButton from "@/components/PublishButton";
 import DeleteNoteButton from "@/components/DeleteNoteButton";
 import CloneToVaultButton from "@/components/CloneToVaultButton";
+import PublicUpsellPrompt from "@/components/PublicUpsellPrompt";
+import ShareButton from "@/components/ShareButton";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ViewNote({ params }: { params: { id: string } }) {
@@ -14,6 +16,18 @@ export default async function ViewNote({ params }: { params: { id: string } }) {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Fetch profile to get quiz preference
+  let hideQuizzes = false;
+  if (user) {
+    const { data: profile } = await supabase.from("profiles").select("quiz_preference").eq("id", user.id).single();
+    if (profile?.quiz_preference === "at_end") {
+      hideQuizzes = true;
+    }
+  } else {
+    // Guest users default to quizzes at the end for a better reading experience
+    hideQuizzes = true;
+  }
 
   const { data: note, error } = await supabase
     .from("notes")
@@ -61,11 +75,12 @@ export default async function ViewNote({ params }: { params: { id: string } }) {
               >
                 <Edit2 size={16} /> Edit
               </Link>
+              <ShareButton path={`/notes/${id}`} title="Share Note" noteId={id} />
               <DeleteNoteButton noteId={id} />
               <PublishButton noteId={id} isAlreadyPublic={note.is_public} />
             </>
           ) : (
-            <CloneToVaultButton note={note} flashcards={flashcards || []} />
+            user && <CloneToVaultButton note={note} flashcards={flashcards || []} />
           )}
         </div>
       </div>
@@ -97,34 +112,21 @@ export default async function ViewNote({ params }: { params: { id: string } }) {
           courseId={note.course_id} 
           topicTitle={note.course_topic} 
           isOwner={isOwner} 
+          hideQuizzes={hideQuizzes}
         />
       </div>
       
-      {/* Action Buttons: Quiz and Flashcards */}
-      {isOwner && (
-        <div className="flex flex-col sm:flex-row gap-4 mb-12">
-          <Link 
-            href={`/notes/${id}/quiz`}
-            className="flex-1 modern-button bg-orange-500 text-white hover:bg-orange-600 py-4 text-lg shadow-orange-500/30"
-          >
-            <PenTool size={24} />
-            Quiz Now
-          </Link>
-          <Link 
-            href={`/review?topic=${encodeURIComponent(note.course_topic || note.title)}`}
-            className="flex-1 modern-button bg-blue-600 text-white hover:bg-blue-700 py-4 text-lg shadow-blue-600/30"
-          >
-            <Play size={24} />
-            Study Flashcards
-          </Link>
-        </div>
-      )}
 
-      {!isOwner && flashcards && flashcards.length > 0 && (
+
+      {!isOwner && user && flashcards && flashcards.length > 0 && (
         <div className="mt-8 text-center bg-orange-50 p-6 rounded-2xl border border-orange-100">
           <p className="text-orange-800 font-bold mb-4">Want to study these flashcards with Active Recall?</p>
           <CloneToVaultButton note={note} flashcards={flashcards} />
         </div>
+      )}
+
+      {!user && (
+        <PublicUpsellPrompt />
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -31,21 +31,30 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  const pathname = request.nextUrl.pathname;
+
+  // Allow guest access to these specific public routes
+  const isPublicShareRoute = 
+    pathname.match(/^\/notes\/[^/]+$/) || 
+    pathname.match(/^\/notes\/[^/]+\/quiz$/) ||
+    pathname.match(/^\/notes\/[^/]+\/flashcards$/) ||
+    pathname.match(/^\/review\/exam\/[^/]+$/);
+
   // Protect internal routes
   const isInternalRoute = 
-    request.nextUrl.pathname.startsWith('/notes') ||
-    request.nextUrl.pathname.startsWith('/courses') ||
-    request.nextUrl.pathname.startsWith('/archive') ||
-    request.nextUrl.pathname.startsWith('/review');
+    pathname.startsWith('/notes') ||
+    pathname.startsWith('/courses') ||
+    pathname.startsWith('/archive') ||
+    pathname.startsWith('/review');
 
-  if (isInternalRoute && !user) {
+  if (isInternalRoute && !isPublicShareRoute && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
   // If user is logged in and visits root or login, redirect to /notes
-  if (user && (request.nextUrl.pathname === '/' || request.nextUrl.pathname === '/login')) {
+  if (user && (pathname === '/' || pathname === '/login')) {
     const url = request.nextUrl.clone()
     url.pathname = '/notes'
     return NextResponse.redirect(url)

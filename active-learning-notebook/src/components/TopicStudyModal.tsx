@@ -9,6 +9,7 @@ export default function TopicStudyModal({ topic, onClose, onComplete }: { topic:
   const [loading, setLoading] = useState(false);
   const [markingComplete, setMarkingComplete] = useState(false);
   const [myNote, setMyNote] = useState<any>(null);
+  const [suggestedNotes, setSuggestedNotes] = useState<any[]>([]);
 
   useEffect(() => {
     fetchNotes();

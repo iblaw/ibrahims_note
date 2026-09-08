@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { CheckCircle2, XCircle, ArrowRight, RotateCcw } from "lucide-react";
 
 interface QuizData {
   question: string;
   options: string[];
   answer: string;
+  note_id?: string;
 }
 
-export default function QuizSession({ quizzes }: { quizzes: QuizData[] }) {
+import PublicUpsellPrompt from "@/components/PublicUpsellPrompt";
+import Link from "next/link";
+
+export default function QuizSession({ quizzes, isGuest }: { quizzes: QuizData[], isGuest?: boolean }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -17,6 +21,16 @@ export default function QuizSession({ quizzes }: { quizzes: QuizData[] }) {
   const [isFinished, setIsFinished] = useState(false);
 
   const currentQuiz = quizzes[currentIndex];
+
+  const shuffledOptions = useMemo(() => {
+    if (!currentQuiz) return [];
+    const list = [...currentQuiz.options];
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }, [currentQuiz]);
 
   const handleSubmit = () => {
     if (!selectedOption) return;
@@ -48,15 +62,19 @@ export default function QuizSession({ quizzes }: { quizzes: QuizData[] }) {
   if (isFinished) {
     const percentage = Math.round((score / quizzes.length) * 100);
     return (
-      <div className="modern-card p-12 text-center">
-        <div className="text-xl font-extrabold text-orange-500 mb-6">{percentage}%</div>
-        <h2 className="text-xl font-bold text-neutral-800 mb-4">Quiz Complete!</h2>
-        <p className="text-lg text-neutral-600 font-medium mb-8">
-          You scored {score} out of {quizzes.length} correctly.
-        </p>
-        <button onClick={restart} className="modern-button bg-neutral-800 text-white shadow-neutral-300">
-          <RotateCcw size={20} className="inline mr-2" /> Try Again
-        </button>
+      <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="modern-card p-12 text-center">
+          <div className="text-xl font-extrabold text-orange-500 mb-6">{percentage}%</div>
+          <h2 className="text-xl font-bold text-neutral-800 mb-4">Quiz Complete!</h2>
+          <p className="text-lg text-neutral-600 font-medium mb-8">
+            You scored {score} out of {quizzes.length} correctly.
+          </p>
+          <button onClick={restart} className="modern-button bg-neutral-800 text-white shadow-neutral-300">
+            <RotateCcw size={20} className="inline mr-2" /> Try Again
+          </button>
+        </div>
+        
+        {isGuest && <PublicUpsellPrompt />}
       </div>
     );
   }
@@ -77,7 +95,7 @@ export default function QuizSession({ quizzes }: { quizzes: QuizData[] }) {
       </h2>
 
       <div className="space-y-4 mb-8">
-        {currentQuiz.options.map((option, idx) => {
+        {shuffledOptions.map((option, idx) => {
           const isSelected = selectedOption === option;
           const isCorrect = option === currentQuiz.answer;
           
@@ -110,23 +128,36 @@ export default function QuizSession({ quizzes }: { quizzes: QuizData[] }) {
         })}
       </div>
 
-      <div className="flex justify-end">
-        {!isSubmitted ? (
-          <button
-            onClick={handleSubmit}
-            disabled={!selectedOption}
-            className="modern-button bg-neutral-800 text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-neutral-300"
-          >
-            Check Answer
-          </button>
-        ) : (
-          <button
-            onClick={handleNext}
-            className="modern-button bg-orange-500 text-white shadow-orange-500/30 flex items-center gap-2"
-          >
-            {currentIndex < quizzes.length - 1 ? "Next Question" : "Finish Quiz"} <ArrowRight size={20} />
-          </button>
-        )}
+      <div className="flex justify-between items-center mt-8">
+        <div>
+          {isSubmitted && currentQuiz.note_id && (
+            <Link 
+              href={`/notes/${currentQuiz.note_id}`}
+              target="_blank"
+              className="text-indigo-600 hover:text-indigo-700 font-bold bg-indigo-50 px-4 py-2 rounded-full flex items-center gap-2"
+            >
+              Review Source Material
+            </Link>
+          )}
+        </div>
+        <div className="flex justify-end">
+          {!isSubmitted ? (
+            <button
+              onClick={handleSubmit}
+              disabled={!selectedOption}
+              className="modern-button bg-neutral-800 text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-neutral-300"
+            >
+              Check Answer
+            </button>
+          ) : (
+            <button
+              onClick={handleNext}
+              className="modern-button bg-orange-500 text-white shadow-orange-500/30 flex items-center gap-2"
+            >
+              {currentIndex < quizzes.length - 1 ? "Next Question" : "Finish Quiz"} <ArrowRight size={20} />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

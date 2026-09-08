@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 interface QuizProps {
@@ -13,8 +13,17 @@ export default function Quiz({ question, options, answer }: QuizProps) {
   const [selected, setSelected] = useState<string | null>(null);
   
   // Support both legacy comma-separated and new pipe-separated formats
-  const separator = options.includes("|") ? "|" : ",";
-  const optionsList = options.split(separator).map(o => o.trim());
+  const optionsList = useMemo(() => {
+    const separator = options.includes("|") ? "|" : ",";
+    const list = options.split(separator).map(o => o.trim());
+    // Fisher-Yates shuffle
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }, [options]);
+
   const isCorrect = selected === answer.trim();
 
   return (

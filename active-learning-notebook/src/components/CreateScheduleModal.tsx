@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Loader2, X } from "lucide-react";
 
@@ -10,6 +10,32 @@ export default function CreateScheduleModal({ courses, onClose, onCreated }: { c
   const [weeklyHours, setWeeklyHours] = useState<number>(10);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (selectedCourses.length === 0) return;
+    
+    let totalMinutes = 0;
+    const selected = courses.filter(c => selectedCourses.includes(c.id));
+    selected.forEach(course => {
+      course.syllabus?.modules?.forEach((m: any) => {
+        m.topics?.forEach((t: any) => {
+          totalMinutes += t.estimatedMinutes || 30; // default 30 mins if not set
+        });
+      });
+    });
+
+    const totalHours = totalMinutes / 60;
+    
+    // Auto-fill: Suggest 1 month from now
+    const suggestedDate = new Date();
+    suggestedDate.setMonth(suggestedDate.getMonth() + 1);
+    setTargetDate(suggestedDate.toISOString().split('T')[0]);
+
+    // Recommend weekly hours (approx 4.33 weeks in a month)
+    const suggestedHours = Math.max(1, Math.ceil(totalHours / 4.33));
+    setWeeklyHours(suggestedHours);
+
+  }, [selectedCourses]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

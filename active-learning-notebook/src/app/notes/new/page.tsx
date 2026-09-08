@@ -5,35 +5,6 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { Sparkles, Loader2, Copy, Check, Link as LinkIcon } from "lucide-react";
 
-const PROMPT_TEMPLATE = `Context: You are an expert instructional designer and AI tutor. Your task is to generate a structured Note Document for a specialized Active Learning platform. The user will provide EITHER raw study materials OR just a Topic Name.
-
-Core Philosophy: Do not generate passive blocks of text. The content must adhere to Richard Feynman's learning principles and the science of Active Recall.
-
-CRITICAL INSTRUCTION: You must output the content in Markdown format, but use the exact custom HTML tags below for interactive elements. DO NOT wrap these HTML tags inside markdown code blocks (e.g., no \`\`\`html). Output them directly in the text.
-
-1. Structure by "First Principles"
-- Begin every note by breaking the topic down to its most fundamental truths.
-
-2. The Feynman Technique (Simplicity & Jargon)
-- Explain concepts as if teaching a 12-year-old.
-- Explicitly define jargon in simple terms.
-
-3. Chunking & In-Text Quizzes
-- Break the document into logical segments (2-3 paragraphs max).
-- At the end of EVERY segment, you MUST insert a set of quizzes (at least 3-4 quizzes per section) to comprehensively test the user's understanding of that segment.
-- Format EACH quiz EXACTLY like this:
-<Quiz question="[Question text]" options="[Option 1] | [Option 2] | [Option 3]" answer="[Exact text of correct option]" />
-
-4. Segment Challenge (Feynman Prompt)
-- At major milestones, challenge the user to explain it EXACTLY like this:
-<FeynmanPrompt concept="[Concept to explain]" />
-
-5. Extraction for Spaced Repetition (Flashcards)
-- Apply the Pareto Principle: Extract the most critical 20% of information that yields 80% of the understanding.
-- Generate at least 2-3 flashcards PER SECTION of the document. Do not just summarize the whole document into 5 cards. You should output a robust list (15+ cards for large topics) covering all critical definitions, formulas, and concepts.
-- Output them at the bottom of the document EXACTLY like this:
-<Flashcard front="[Question]" back="[Answer]" />
-`;
 
 export default function CreateNote() {
   const [title, setTitle] = useState("");
@@ -46,11 +17,14 @@ export default function CreateNote() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [selectedTopic, setSelectedTopic] = useState<string>("");
   const [availableTopics, setAvailableTopics] = useState<string[]>([]);
-  
+
+  const [profile, setProfile] = useState<any>(null);
+
   const router = useRouter();
 
   useEffect(() => {
     fetchCourses();
+    fetchProfile();
     
     // Auto-fill from query params if navigated from the master timetable
     const searchParams = new URLSearchParams(window.location.search);
@@ -64,9 +38,75 @@ export default function CreateNote() {
     }
   }, []);
 
+  const fetchProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      if (data) setProfile(data);
+    }
+  };
+
   const fetchCourses = async () => {
     const { data } = await supabase.from("courses").select("*").order("created_at", { ascending: false });
     if (data) setCourses(data);
+  };
+
+  const getDynamicPrompt = () => {
+    let quizInstruction = `3. Chunking & In-Text Quizzes\n- Break the document into logical segments (2-3 paragraphs max).\n- At the end of EVERY segment, you MUST insert a set of quizzes (at least 3-4 quizzes per section) to comprehensively test the user's understanding of that segment.\n- Format EACH quiz EXACTLY like this:\n<Quiz question="[Question text]" options="[Option 1] | [Option 2] | [Option 3]" answer="[Exact text of correct option]" />`;
+
+    let mnemonicInstruction = "";
+    if (profile?.mnemonic_preference === "acronyms") {
+      mnemonicInstruction = `\n\n6. Mnemonics (Acronyms & Acrostics)\n- Throughout the note, proactively create Acronyms and Acrostics to help the user memorize lists, formulas, or complex concepts.`;
+    } else if (profile?.mnemonic_preference === "story") {
+      mnemonicInstruction = `\n\n6. Mnemonics (Stories & Rhymes)\n- Throughout the note, proactively create short stories, vivid imagery, or rhymes to help the user memorize complex concepts.`;
+    } else if (profile?.mnemonic_preference === "mixed") {
+      mnemonicInstruction = `\n\n6. Mnemonics\n- Throughout the note, proactively create mixed mnemonics (Acronyms, Stories, Rhymes) to help the user memorize complex concepts.`;
+    }
+
+    let lengthInstruction = "You must output a comprehensive, structured Note Document.";
+    if (profile?.note_length_preference === "summary") {
+      lengthInstruction = "You must output a concise, summarized Note Document focusing ONLY on the absolute core concepts. Keep it short and to the point.";
+    } else if (profile?.note_length_preference === "detailed") {
+      lengthInstruction = "You must output a long, highly-detailed Note Document exploring every facet of the topic with thorough explanations and examples.";
+    }
+
+    let topicInstruction = "";
+    if (selectedTopic) {
+      topicInstruction = `\n\n*** TARGET TOPIC ***\nThe user is requesting a note specifically on the topic: "${selectedTopic}".\nEnsure the generated Note Document focuses completely on explaining this topic accurately and thoroughly.`;
+    }
+
+    let personaInstruction = "";
+    if (profile?.field_of_study || profile?.primary_goal || profile?.learning_style) {
+      personaInstruction = `\n\n*** USER PERSONA & CONTEXT ***\nTailor your explanations, examples, and analogies to resonate with this user's specific background and goals:`;
+      if (profile.field_of_study) personaInstruction += `\n- Field of Study/Profession: ${profile.field_of_study}`;
+      if (profile.primary_goal) personaInstruction += `\n- Primary Goal: ${profile.primary_goal}`;
+      if (profile.learning_style) personaInstruction += `\n- Learning Style: ${profile.learning_style}`;
+    }
+
+    return `Context: You are an expert instructional designer and AI tutor. Your task is to generate a Note Document for a specialized Active Learning platform.${personaInstruction}${topicInstruction}
+
+Core Philosophy: Do not generate passive blocks of text. The content must adhere to Richard Feynman's learning principles and the science of Active Recall.
+
+CRITICAL INSTRUCTION: You must output the content in Markdown format, but use the exact custom HTML tags below for interactive elements. DO NOT wrap these HTML tags inside markdown code blocks (e.g., no \`\`\`html). Output them directly in the text.
+
+1. Overall Length & Depth
+- ${lengthInstruction}
+
+2. The Feynman Technique (Simplicity & Jargon)
+- Explain concepts as if teaching a 12-year-old.
+- Explicitly define jargon in simple terms.
+
+${quizInstruction}
+
+4. Segment Challenge (Feynman Prompt)
+- At major milestones, challenge the user to explain it EXACTLY like this:
+<FeynmanPrompt concept="[Concept to explain]" />
+
+5. Extraction for Spaced Repetition (Flashcards)
+- Apply the Pareto Principle: Extract the most critical 20% of information that yields 80% of the understanding.
+- Generate at least 2-3 flashcards PER SECTION of the document. Do not just summarize the whole document into 5 cards. You should output a robust list (15+ cards for large topics) covering all critical definitions, formulas, and concepts.
+- Output them at the bottom of the document EXACTLY like this:
+<Flashcard front="[Question]" back="[Answer]" />${mnemonicInstruction}`;
   };
 
   useEffect(() => {
@@ -87,7 +127,7 @@ export default function CreateNote() {
   }, [selectedCourseId, courses]);
 
   const handleCopyPrompt = () => {
-    navigator.clipboard.writeText(PROMPT_TEMPLATE);
+    navigator.clipboard.writeText(getDynamicPrompt());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

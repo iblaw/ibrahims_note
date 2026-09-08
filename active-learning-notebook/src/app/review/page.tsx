@@ -15,6 +15,7 @@ interface Flashcard {
   repetitions: number;
   next_review_date: string;
   topic?: string;
+  note_id?: string;
   notes?: {
     title: string;
   };
@@ -173,6 +174,18 @@ export default function ReviewPage() {
             >
               + Create Deck
             </Link>
+            <Link 
+              href="/review/exam"
+              className="modern-button bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50 flex items-center gap-2 shadow-none border border-indigo-200 dark:border-indigo-800/50"
+            >
+              Exam Mode
+            </Link>
+            <Link 
+              href="/review/flashcards"
+              className="modern-button bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 flex items-center gap-2 shadow-none border border-blue-200 dark:border-blue-800/50"
+            >
+              Grand Flashcards
+            </Link>
             <button 
               onClick={() => startSession()}
               disabled={totalDue === 0}
@@ -308,11 +321,22 @@ export default function ReviewPage() {
 
           {/* Back of Card */}
           <div className="absolute inset-0 modern-card flex flex-col justify-center items-center text-center p-8 sm:p-16 border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-[#34302d] [backface-visibility:hidden] [transform:rotateY(180deg)]">
-            <p className="text-xl sm:text-xl font-bold text-neutral-600 dark:text-neutral-300 mb-12">
-              {card.back}
-            </p>
+            <div className="flex-1 flex flex-col justify-center items-center">
+              <p className="text-xl sm:text-xl font-bold text-neutral-600 dark:text-neutral-300 mb-8">
+                {card.back}
+              </p>
+              {card.note_id && (
+                <Link 
+                  href={`/notes/${card.note_id}`}
+                  target="_blank"
+                  className="text-orange-500 hover:text-orange-600 font-bold text-sm bg-orange-50 dark:bg-orange-900/20 px-4 py-2 rounded-full mb-12 flex items-center gap-2"
+                >
+                  Need Help? Review Note &rarr;
+                </Link>
+              )}
+            </div>
             
-            <div className="flex gap-4 w-full sm:w-auto">
+            <div className="flex gap-4 w-full sm:w-auto mt-auto">
               <button 
                 onClick={() => handleRate("hard")}
                 disabled={saving}
