@@ -27,7 +27,9 @@ export default function MyNotes() {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      setNotes(data);
+      // Filter out notes that are actually Exams so they don't clutter the notes page
+      const filtered = data.filter(n => n.course_topic !== "GRAND_EXAM" && n.course_topic !== "SHARED_EXAM");
+      setNotes(filtered);
     }
     setLoading(false);
   };
@@ -97,7 +99,7 @@ export default function MyNotes() {
             >
               <div className="relative">
                 <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                  <DeleteNoteButton noteId={note.id} />
+                  <DeleteNoteButton noteId={note.id} onDeleted={() => fetchNotes()} />
                 </div>
                 <h3 className="text-xl font-bold mb-2 pr-12 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors line-clamp-2">
                   {note.title}

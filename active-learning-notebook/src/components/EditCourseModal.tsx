@@ -25,25 +25,25 @@ export default function EditCourseModal({ course, existingGroups, onClose, onUpd
 
   return (
     <ModalPortal>
-      <div className="absolute inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="bg-white rounded-[2rem] p-6 md:p-8 w-full max-w-lg shadow-2xl relative border-2 border-orange-200 max-h-[90vh] flex flex-col">
-          <button onClick={onClose} className="absolute top-6 right-6 text-neutral-400 hover:text-neutral-900 transition-colors z-10">
+      <div className="fixed inset-0 z-[100] bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 overflow-y-auto">
+        <div className="bg-white dark:bg-[#2d2926] rounded-[2rem] p-6 md:p-8 w-full max-w-lg shadow-2xl relative border-2 border-orange-200 dark:border-orange-900/30 flex flex-col my-auto">
+          <button onClick={onClose} className="absolute top-6 right-6 text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors z-10">
             <X size={24} />
           </button>
           
-          <h2 className="text-xl font-bold text-neutral-900 mb-6 shrink-0 pr-8">Edit Course Outline</h2>
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-6 shrink-0 pr-8">Edit Course Outline</h2>
           
-          <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-1 pr-2 pb-2">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-bold text-neutral-700 mb-1">Course Title</label>
-              <input type="text" required value={title} onChange={e => setTitle(e.target.value)} className="w-full p-3 rounded-xl border-2 border-neutral-200 focus:border-neutral-500 font-bold bg-neutral-50" />
+              <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-1">Course Title</label>
+              <input type="text" required value={title} onChange={e => setTitle(e.target.value)} className="w-full p-3 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 focus:border-neutral-500 font-bold bg-neutral-50 dark:bg-[#1a1816] text-neutral-900 dark:text-neutral-100 outline-none" />
             </div>
             
             <div>
-              <label className="flex items-center gap-2 text-sm font-bold mb-1 text-neutral-700">
+              <label className="flex items-center gap-2 text-sm font-bold mb-1 text-neutral-700 dark:text-neutral-300">
                 <Folder size={16} /> Course Grouping
               </label>
-              <input type="text" list="edit-group-suggestions" value={groupName} onChange={e => setGroupName(e.target.value)} placeholder="e.g. Fall Semester 2026" className="w-full p-3 rounded-xl border-2 border-neutral-200 focus:border-neutral-500 font-bold bg-neutral-50" />
+              <input type="text" list="edit-group-suggestions" value={groupName} onChange={e => setGroupName(e.target.value)} placeholder="e.g. Fall Semester 2026" className="w-full p-3 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 focus:border-neutral-500 font-bold bg-neutral-50 dark:bg-[#1a1816] text-neutral-900 dark:text-neutral-100 outline-none" />
               <datalist id="edit-group-suggestions">
                 {existingGroups.map((group) => (
                   <option key={group} value={group} />
@@ -52,13 +52,13 @@ export default function EditCourseModal({ course, existingGroups, onClose, onUpd
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-sm font-bold mb-1 text-neutral-700">
+              <label className="flex items-center gap-2 text-sm font-bold mb-1 text-neutral-700 dark:text-neutral-300">
                 <Calendar size={16} /> Target Date
               </label>
-              <input type="date" required value={targetDate} onChange={e => setTargetDate(e.target.value)} className="w-full p-3 rounded-xl border-2 border-neutral-200 focus:border-neutral-500 font-bold bg-neutral-50" />
+              <input type="date" required value={targetDate} onChange={e => setTargetDate(e.target.value)} className="w-full p-3 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 focus:border-neutral-500 font-bold bg-neutral-50 dark:bg-[#1a1816] text-neutral-900 dark:text-neutral-100 outline-none" />
             </div>
 
-            <button type="submit" disabled={loading} className="w-full modern-button bg-gradient-to-r from-orange-400 to-amber-500 text-white mt-6 shrink-0">
+            <button type="submit" disabled={loading} className="w-full modern-button bg-gradient-to-r from-orange-400 to-amber-500 text-white mt-6 shrink-0 shadow-xl shadow-orange-500/20">
               {loading ? <Loader2 className="animate-spin mx-auto" size={24} /> : "Save Changes"}
             </button>
           </form>
