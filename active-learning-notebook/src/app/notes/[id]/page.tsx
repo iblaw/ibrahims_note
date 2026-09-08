@@ -51,16 +51,51 @@ export default async function ViewNote({ params }: { params: { id: string } }) {
   // Serialize the MDX content for the client component
   let mdxSource: any = null;
   let mdxError: string | null = null;
+  let rawContent = note.content || "";
+  let wasAutoFixed = false;
   
   try {
-    mdxSource = await serialize(note.content || "", {
+    mdxSource = await serialize(rawContent, {
       parseFrontmatter: true,
     });
   } catch (err: any) {
-    console.error("MDX Compilation Error:", err);
-    mdxError = err.message || "Failed to parse markdown";
-    // Fallback: serialize a simple error message so the page still loads
-    mdxSource = await serialize(`> **Warning:** The markdown for this note contains invalid syntax that prevents it from rendering correctly. You can still click "Edit" to fix the raw text. \n\n**Error Details:**\n\`${mdxError}\``);
+    console.warn("Initial MDX Compilation failed. Attempting auto-fix...", err.message);
+    
+    // Auto-fix 1: Unescaped less-than signs before a number (e.g. `<5`)
+    let sanitizedContent = rawContent.replace(/<(\d)/g, '&lt;$1');
+    
+    // Auto-fix 2: Unescaped less-than signs before a space (e.g. `< `)
+    sanitizedContent = sanitizedContent.replace(/<(\s)/g, '&lt;$1');
+
+    try {
+      // Try compiling again with the sanitized content
+      mdxSource = await serialize(sanitizedContent, {
+        parseFrontmatter: true,
+      });
+      wasAutoFixed = true;
+    } catch (err2: any) {
+      console.error("MDX Compilation Error after auto-fix:", err2);
+      mdxError = err2.message || "Failed to parse markdown";
+      
+      const errorMessage = `
+> [!WARNING]
+> **MDX Rendering Failed**
+> 
+> The AI-generated markdown contains invalid syntax (such as an unclosed HTML tag or an unescaped \`<\` character) and could not be rendered.
+> 
+> **How to fix this:**
+> 1. Click the **Edit** button above.
+> 2. Look for any \`<\` signs that are not part of a valid HTML tag (e.g., \`<Quiz>\` or \`<Flashcard>\`).
+> 3. If you find something like \`x < y\`, add spaces around it, or replace the \`<\` with \`&lt;\`.
+> 4. Ensure all \`<Quiz>\`, \`<Flashcard>\`, and \`<FeynmanPrompt>\` tags are closed properly.
+> 
+> **Error Details:**
+> \`\`\`
+> ${mdxError}
+> \`\`\`
+`;
+      mdxSource = await serialize(errorMessage, { parseFrontmatter: true });
+    }
   }
 
   const dateStr = new Date(note.created_at).toLocaleDateString("en-US", {
