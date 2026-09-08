@@ -27,8 +27,8 @@ export default function MyNotes() {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      // Filter out notes that are actually Exams so they don't clutter the notes page
-      const filtered = data.filter(n => n.course_topic !== "GRAND_EXAM" && n.course_topic !== "SHARED_EXAM");
+      // Filter out notes that are actually Exams or Flashcard Decks so they don't clutter the notes page
+      const filtered = data.filter(n => n.course_topic !== "GRAND_EXAM" && n.course_topic !== "SHARED_EXAM" && n.course_topic !== "SHARED_FLASHCARDS");
       setNotes(filtered);
     }
     setLoading(false);
