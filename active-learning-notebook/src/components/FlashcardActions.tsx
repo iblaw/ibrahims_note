@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Share2, Check, Loader2, Save, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import ModalPortal from "@/components/ModalPortal";
 
 export default function FlashcardActions({ flashcards, defaultTitle = "Grand Flashcards", onSaved }: { flashcards: any[], defaultTitle?: string, onSaved?: (deck: any) => void }) {
   const [sharing, setSharing] = useState(false);
@@ -87,49 +88,51 @@ export default function FlashcardActions({ flashcards, defaultTitle = "Grand Fla
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-neutral-900/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-          <div className="bg-white dark:bg-[#2d2926] rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 my-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
-                {modalAction === "share" ? <Share2 className="text-indigo-600 dark:text-indigo-400" /> : <Save className="text-neutral-600 dark:text-neutral-400" />}
-                {modalAction === "share" ? "Share Grand Flashcards" : "Save Grand Flashcards"}
-              </h3>
-              <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full text-neutral-500 dark:text-neutral-400 transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-            
-            <div className="mb-6">
-              <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-2">Deck Title</label>
-              <input 
-                type="text" 
-                value={titleInput}
-                onChange={(e) => setTitleInput(e.target.value)}
-                autoFocus
-                onKeyDown={(e) => e.key === 'Enter' && confirmAction()}
-                className="w-full p-4 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 focus:border-indigo-500 bg-neutral-50 dark:bg-[#1a1816] text-neutral-900 dark:text-neutral-100 font-bold text-lg outline-none transition-colors"
-                placeholder="e.g., Biology Midterm Practice"
-              />
-            </div>
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-neutral-900/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+            <div className="bg-white dark:bg-[#2d2926] rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 my-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
+                  {modalAction === "share" ? <Share2 className="text-indigo-600 dark:text-indigo-400" /> : <Save className="text-neutral-600 dark:text-neutral-400" />}
+                  {modalAction === "share" ? "Share Grand Flashcards" : "Save Grand Flashcards"}
+                </h3>
+                <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full text-neutral-500 dark:text-neutral-400 transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-2">Deck Title</label>
+                <input 
+                  type="text" 
+                  value={titleInput}
+                  onChange={(e) => setTitleInput(e.target.value)}
+                  autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && confirmAction()}
+                  className="w-full p-4 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 focus:border-indigo-500 bg-neutral-50 dark:bg-[#1a1816] text-neutral-900 dark:text-neutral-100 font-bold text-lg outline-none transition-colors"
+                  placeholder="e.g., Biology Midterm Practice"
+                />
+              </div>
 
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setModalOpen(false)}
-                className="flex-1 py-3 px-4 rounded-xl font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={confirmAction}
-                className={`flex-1 py-3 px-4 rounded-xl font-bold text-white shadow-xl transition-all ${
-                  modalAction === "share" ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-900/20" : "bg-neutral-900 hover:bg-neutral-800 shadow-neutral-900/20"
-                }`}
-              >
-                {modalAction === "share" ? "Share & Copy Link" : "Save Deck"}
-              </button>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setModalOpen(false)}
+                  className="flex-1 py-3 px-4 rounded-xl font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmAction}
+                  className={`flex-1 py-3 px-4 rounded-xl font-bold text-white shadow-xl transition-all ${
+                    modalAction === "share" ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-900/20" : "bg-neutral-900 hover:bg-neutral-800 shadow-neutral-900/20"
+                  }`}
+                >
+                  {modalAction === "share" ? "Share & Copy Link" : "Save Deck"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </>
   );
