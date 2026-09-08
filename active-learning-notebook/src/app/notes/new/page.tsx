@@ -5,18 +5,15 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { Sparkles, Loader2, Copy, Check, Link as LinkIcon } from "lucide-react";
 
-
-import Editor from "react-simple-code-editor";
-import Prism from "prismjs";
-import "prismjs/components/prism-markdown";
-import "prismjs/components/prism-jsx";
-import "prismjs/themes/prism-tomorrow.css"; // Dark theme for the editor
+import Editor, { useMonaco } from "@monaco-editor/react";
+import { validateMdx } from "@/app/actions/validateMdx";
 
 export default function CreateNote() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const monaco = useMonaco();
   
   // Linking state
   const [courses, setCourses] = useState<any[]>([]);
@@ -25,6 +22,9 @@ export default function CreateNote() {
   const [availableTopics, setAvailableTopics] = useState<string[]>([]);
 
   const [profile, setProfile] = useState<any>(null);
+  
+  // Validation State
+  const [mdxError, setMdxError] = useState<{message: string, line: number, column: number} | null>(null);
 
   const router = useRouter();
 
@@ -139,6 +139,51 @@ ANTI-LAZINESS RULES (MANDATORY):
       setAvailableTopics([]);
     }
   }, [selectedCourseId, courses]);
+
+  // Real-time MDX Validation with Debounce
+  useEffect(() => {
+    if (!content) return;
+    
+    const timeoutId = setTimeout(async () => {
+      const res = await validateMdx(content);
+      if (res.success) {
+        setMdxError(null);
+        if (monaco) {
+          const models = monaco.editor.getModels();
+          if (models.length > 0) monaco.editor.setModelMarkers(models[0], "mdx", []);
+        }
+      } else if (res.error) {
+        setMdxError(res.error);
+        if (monaco) {
+          const models = monaco.editor.getModels();
+          if (models.length > 0) {
+            monaco.editor.setModelMarkers(models[0], "mdx", [{
+              startLineNumber: res.error.line,
+              startColumn: res.error.column || 1,
+              endLineNumber: res.error.line,
+              endColumn: 1000,
+              message: res.error.message,
+              severity: monaco.MarkerSeverity.Error
+            }]);
+          }
+        }
+      }
+    }, 1000); // 1s debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [content, monaco]);
+
+  const jumpToError = () => {
+    if (monaco && mdxError) {
+      const editors = monaco.editor.getEditors();
+      if (editors.length > 0) {
+        const editor = editors[0];
+        editor.revealLineInCenter(mdxError.line);
+        editor.setPosition({ lineNumber: mdxError.line, column: mdxError.column || 1 });
+        editor.focus();
+      }
+    }
+  };
 
   const handleCopyPrompt = () => {
     navigator.clipboard.writeText(getDynamicPrompt());
@@ -282,18 +327,39 @@ ANTI-LAZINESS RULES (MANDATORY):
           <label className="block text-sm font-bold mb-2 text-neutral-700 dark:text-neutral-300">
             MDX Content
           </label>
-          <div className="bg-[#2d2d2d] p-6 rounded-3xl shadow-sm border border-neutral-700 h-[60vh] overflow-y-auto">
-            <Editor
-              value={content}
-              onValueChange={setContent}
-              highlight={(code) => Prism.highlight(code, Prism.languages.jsx || Prism.languages.markdown, "jsx")}
-              padding={10}
-              className="font-mono text-sm leading-relaxed text-white min-h-full w-full"
-              style={{
-                fontFamily: '"Fira Code", "JetBrains Mono", monospace',
-                outline: "none",
-              }}
-            />
+          <div className="space-y-4">
+            {mdxError && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-xl flex items-center justify-between animate-in fade-in zoom-in duration-300">
+                <div>
+                  <p className="text-red-800 dark:text-red-400 font-bold text-sm">Syntax Error Detected</p>
+                  <p className="text-red-600 dark:text-red-300 text-xs font-mono mt-1">{mdxError.message}</p>
+                </div>
+                <button 
+                  onClick={jumpToError}
+                  className="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-800/40 dark:hover:bg-red-800/60 text-red-700 dark:text-red-300 rounded-lg text-sm font-bold transition-colors"
+                >
+                  Go to Line {mdxError.line}
+                </button>
+              </div>
+            )}
+            <div className="bg-[#1e1e1e] p-2 rounded-3xl shadow-sm border border-neutral-700 h-[70vh] overflow-hidden">
+              <Editor
+                height="100%"
+                language="markdown"
+                theme="vs-dark"
+                value={content}
+                onChange={(val) => setContent(val || "")}
+                options={{
+                  minimap: { enabled: true },
+                  fontSize: 14,
+                  fontFamily: '"Fira Code", "JetBrains Mono", monospace',
+                  wordWrap: "on",
+                  padding: { top: 16, bottom: 16 },
+                  scrollBeyondLastLine: false,
+                  smoothScrolling: true,
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
     "@vercel/analytics": "^2.0.1",
@@ -16,15 +17,12 @@
     "lucide-react": "^1.35.0",
     "next": "16.3.3",
     "next-mdx-remote": "^6.0.0",
-    "prismjs": "^1.30.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "react-simple-code-editor": "^0.14.1"
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "@types/prismjs": "^1.26.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

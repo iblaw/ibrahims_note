@@ -3,19 +3,16 @@
 import { useState, useEffect, use } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import Editor, { useMonaco } from "@monaco-editor/react";
+import { validateMdx } from "@/app/actions/validateMdx";
 import { ArrowLeft, Save, Loader2, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
-
-import Editor from "react-simple-code-editor";
-import Prism from "prismjs";
-import "prismjs/components/prism-markdown";
-import "prismjs/components/prism-jsx";
-import "prismjs/themes/prism-tomorrow.css"; // Dark theme for the editor
 
 export default function EditNote({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const noteId = resolvedParams.id;
   const router = useRouter();
+  const monaco = useMonaco();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -29,14 +26,15 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
   const [selectedTopic, setSelectedTopic] = useState<string>("");
   const [availableTopics, setAvailableTopics] = useState<string[]>([]);
 
+  // Validation State
+  const [mdxError, setMdxError] = useState<{message: string, line: number, column: number} | null>(null);
+
   useEffect(() => {
     fetchData();
   }, [noteId]);
 
   const fetchData = async () => {
-    // Fetch the note
     const { data: note } = await supabase.from("notes").select("*").eq("id", noteId).single();
-    // Fetch user's courses
     const { data: userCourses } = await supabase.from("courses").select("*").order("created_at", { ascending: false });
 
     if (note) {
@@ -53,28 +51,55 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
     setLoading(false);
   };
 
-  // Update available topics when selected course changes
   useEffect(() => {
     if (!selectedCourseId) {
       setAvailableTopics([]);
-      // Only clear topic if it's a user interaction changing the course, 
-      // but simpler to just let it mismatch and let the user select a new one.
       return;
     }
-    
     const course = courses.find(c => c.id === selectedCourseId);
     if (course && course.syllabus && course.syllabus.modules) {
       const topics: string[] = [];
       course.syllabus.modules.forEach((m: any) => {
-        m.topics?.forEach((t: any) => {
-          topics.push(t.title);
-        });
+        m.topics?.forEach((t: any) => topics.push(t.title));
       });
       setAvailableTopics(topics);
     } else {
       setAvailableTopics([]);
     }
   }, [selectedCourseId, courses]);
+
+  // Real-time MDX Validation with Debounce
+  useEffect(() => {
+    if (!content) return;
+    
+    const timeoutId = setTimeout(async () => {
+      const res = await validateMdx(content);
+      if (res.success) {
+        setMdxError(null);
+        if (monaco) {
+          const models = monaco.editor.getModels();
+          if (models.length > 0) monaco.editor.setModelMarkers(models[0], "mdx", []);
+        }
+      } else if (res.error) {
+        setMdxError(res.error);
+        if (monaco) {
+          const models = monaco.editor.getModels();
+          if (models.length > 0) {
+            monaco.editor.setModelMarkers(models[0], "mdx", [{
+              startLineNumber: res.error.line,
+              startColumn: res.error.column || 1,
+              endLineNumber: res.error.line,
+              endColumn: 1000,
+              message: res.error.message,
+              severity: monaco.MarkerSeverity.Error
+            }]);
+          }
+        }
+      }
+    }, 1000); // 1s debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [content, monaco]);
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) return;
@@ -88,6 +113,18 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
     }).eq("id", noteId);
     
     router.push(`/notes/${noteId}`);
+  };
+
+  const jumpToError = () => {
+    if (monaco && mdxError) {
+      const editors = monaco.editor.getEditors();
+      if (editors.length > 0) {
+        const editor = editors[0];
+        editor.revealLineInCenter(mdxError.line);
+        editor.setPosition({ lineNumber: mdxError.line, column: mdxError.column || 1 });
+        editor.focus();
+      }
+    }
   };
 
   if (loading) {
@@ -155,18 +192,39 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
         </div>
       </div>
 
-      <div className="bg-[#2d2d2d] p-6 rounded-3xl shadow-sm border border-neutral-700 h-[60vh] overflow-y-auto">
-        <Editor
-          value={content}
-          onValueChange={setContent}
-          highlight={(code) => Prism.highlight(code, Prism.languages.jsx || Prism.languages.markdown, "jsx")}
-          padding={10}
-          className="font-mono text-sm leading-relaxed text-white min-h-full"
-          style={{
-            fontFamily: '"Fira Code", "JetBrains Mono", monospace',
-            outline: "none",
-          }}
-        />
+      <div className="space-y-4">
+        {mdxError && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-xl flex items-center justify-between animate-in fade-in zoom-in duration-300">
+            <div>
+              <p className="text-red-800 dark:text-red-400 font-bold text-sm">Syntax Error Detected</p>
+              <p className="text-red-600 dark:text-red-300 text-xs font-mono mt-1">{mdxError.message}</p>
+            </div>
+            <button 
+              onClick={jumpToError}
+              className="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-800/40 dark:hover:bg-red-800/60 text-red-700 dark:text-red-300 rounded-lg text-sm font-bold transition-colors"
+            >
+              Go to Line {mdxError.line}
+            </button>
+          </div>
+        )}
+        <div className="bg-[#1e1e1e] p-2 rounded-3xl shadow-sm border border-neutral-700 h-[70vh] overflow-hidden">
+          <Editor
+            height="100%"
+            language="markdown"
+            theme="vs-dark"
+            value={content}
+            onChange={(val) => setContent(val || "")}
+            options={{
+              minimap: { enabled: true },
+              fontSize: 14,
+              fontFamily: '"Fira Code", "JetBrains Mono", monospace',
+              wordWrap: "on",
+              padding: { top: 16, bottom: 16 },
+              scrollBeyondLastLine: false,
+              smoothScrolling: true,
+            }}
+          />
+        </div>
       </div>
     </div>
   );
