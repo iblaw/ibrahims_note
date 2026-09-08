@@ -6,6 +6,12 @@ import { useRouter } from "next/navigation";
 import { Sparkles, Loader2, Copy, Check, Link as LinkIcon } from "lucide-react";
 
 
+import Editor from "react-simple-code-editor";
+import Prism from "prismjs";
+import "prismjs/components/prism-markdown";
+import "prismjs/components/prism-jsx";
+import "prismjs/themes/prism-tomorrow.css"; // Dark theme for the editor
+
 export default function CreateNote() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -276,12 +282,19 @@ ANTI-LAZINESS RULES (MANDATORY):
           <label className="block text-sm font-bold mb-2 text-neutral-700 dark:text-neutral-300">
             MDX Content
           </label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Paste your AI generated Markdown (with custom tags) here..."
-            className="w-full min-h-[500px] p-6 rounded-2xl border-2 border-neutral-200 dark:border-neutral-700 focus:border-neutral-500 focus:ring-4 focus:ring-neutral-100 dark:focus:ring-neutral-800 transition-all outline-none resize-y font-mono text-sm bg-white dark:bg-[#2a2624] leading-relaxed"
-          />
+          <div className="bg-[#2d2d2d] p-6 rounded-3xl shadow-sm border border-neutral-700 h-[60vh] overflow-y-auto">
+            <Editor
+              value={content}
+              onValueChange={setContent}
+              highlight={(code) => Prism.highlight(code, Prism.languages.jsx || Prism.languages.markdown, "jsx")}
+              padding={10}
+              className="font-mono text-sm leading-relaxed text-white min-h-full w-full"
+              style={{
+                fontFamily: '"Fira Code", "JetBrains Mono", monospace',
+                outline: "none",
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>

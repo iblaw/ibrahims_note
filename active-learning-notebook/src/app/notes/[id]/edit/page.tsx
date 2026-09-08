@@ -6,6 +6,12 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Loader2, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 
+import Editor from "react-simple-code-editor";
+import Prism from "prismjs";
+import "prismjs/components/prism-markdown";
+import "prismjs/components/prism-jsx";
+import "prismjs/themes/prism-tomorrow.css"; // Dark theme for the editor
+
 export default function EditNote({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const noteId = resolvedParams.id;
@@ -149,12 +155,17 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#34302d] p-6 rounded-3xl shadow-sm border border-neutral-200 dark:border-neutral-700 h-[60vh]">
-        <textarea 
+      <div className="bg-[#2d2d2d] p-6 rounded-3xl shadow-sm border border-neutral-700 h-[60vh] overflow-y-auto">
+        <Editor
           value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="w-full h-full bg-transparent outline-none resize-none text-neutral-700 dark:text-neutral-300 font-mono text-sm leading-relaxed"
-          placeholder="Start writing your MDX note..."
+          onValueChange={setContent}
+          highlight={(code) => Prism.highlight(code, Prism.languages.jsx || Prism.languages.markdown, "jsx")}
+          padding={10}
+          className="font-mono text-sm leading-relaxed text-white min-h-full"
+          style={{
+            fontFamily: '"Fira Code", "JetBrains Mono", monospace',
+            outline: "none",
+          }}
         />
       </div>
     </div>
