@@ -75,8 +75,8 @@ export default function TopicStudyModal({ topic, onClose, onComplete }: { topic:
   };
 
   return (
-    <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-[2rem] p-6 md:p-8 w-full max-w-xl shadow-2xl relative border-2 border-orange-200">
+    <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+      <div className="bg-white rounded-[2rem] p-6 md:p-8 w-full max-w-xl shadow-2xl relative border-2 border-orange-200 max-h-[90vh] overflow-y-auto">
         <button onClick={onClose} className="absolute top-6 right-6 text-neutral-400 hover:text-neutral-900 transition-colors">
           <X size={24} />
         </button>

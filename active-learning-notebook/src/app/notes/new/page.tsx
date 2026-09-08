@@ -106,7 +106,15 @@ ${quizInstruction}
 - Apply the Pareto Principle: Extract the most critical 20% of information that yields 80% of the understanding.
 - Generate at least 2-3 flashcards PER SECTION of the document. Do not just summarize the whole document into 5 cards. You should output a robust list (15+ cards for large topics) covering all critical definitions, formulas, and concepts.
 - Output them at the bottom of the document EXACTLY like this:
-<Flashcard front="[Question]" back="[Answer]" />${mnemonicInstruction}`;
+<Flashcard front="[Question]" back="[Answer]" />${mnemonicInstruction}
+
+ANTI-LAZINESS RULES (MANDATORY):
+- You MUST generate the COMPLETE note from start to finish. Do NOT stop, truncate, or trail off mid-generation under any circumstances.
+- Every section MUST contain its required quizzes and flashcards as specified above. Do not skip or reduce them even for long topics.
+- Do NOT write placeholder text like "[Continue as needed]", "[More content here]", "..." or "etc." — write everything out in full.
+- Do NOT summarise or compress sections to save space. Each section must be fully written.
+- Do NOT deviate from the custom HTML tag formats specified above. Using markdown code blocks around these tags will break the application.
+- Your response is INVALID if it is incomplete, cuts off early, or omits required interactive elements (Quiz, Flashcard, FeynmanPrompt tags).`;
   };
 
   useEffect(() => {

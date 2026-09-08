@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { BookOpen, BrainCircuit, Library, Users, Calendar, User, Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 
 export function NavBar({ user }: { user: any }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,17 +35,28 @@ export function NavBar({ user }: { user: any }) {
           {user && (
             <>
               {/* Desktop Nav */}
-              <div className="hidden lg:flex space-x-1 items-center">
-                {navLinks.map((link) => (
-                  <Link 
-                    key={link.href}
-                    href={link.href} 
-                    className={`flex items-center gap-2 font-medium transition-colors px-4 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 ${pathname === link.href ? 'text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400' : 'text-neutral-600 dark:text-neutral-300'}`}
-                  >
-                    {link.icon}
-                    <span>{link.label}</span>
-                  </Link>
-                ))}
+              <div className="hidden lg:flex space-x-1 items-center relative">
+                {navLinks.map((link) => {
+                  const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href + '/'));
+                  
+                  return (
+                    <Link 
+                      key={link.href}
+                      href={link.href} 
+                      className={`relative flex items-center gap-2 font-medium px-4 py-2 rounded-lg transition-colors z-10 ${isActive ? 'text-orange-700 dark:text-orange-300' : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="navbar-active"
+                          className="absolute inset-0 bg-orange-100 dark:bg-orange-900/30 rounded-lg -z-10"
+                          transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                        />
+                      )}
+                      {link.icon}
+                      <span>{link.label}</span>
+                    </Link>
+                  );
+                })}
               </div>
 
               {/* Mobile Menu Button */}

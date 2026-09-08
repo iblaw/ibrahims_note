@@ -6,6 +6,7 @@ import { ArrowRight, Book, Calendar, Clock, Loader2, Trophy, BrainCircuit, Flame
 import Link from "next/link";
 import { generateMasterTimetable } from "@/lib/timetable";
 import TopicStudyModal from "@/components/TopicStudyModal";
+import { DashboardSkeleton } from "@/components/Skeleton";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -134,11 +135,7 @@ export default function Dashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <Loader2 className="animate-spin text-neutral-400" size={48} />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
   const hour = new Date().getHours();
   let greeting = "Good evening!";

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { GraduationCap, Loader2, Copy, Check, Calendar, Clock } from "lucide-react";
+import { GraduationCap, Loader2, Copy, Check, Calendar, Clock, Folder } from "lucide-react";
 
 const PROMPT_TEMPLATE = `Context: You are an expert academic planner and AI tutor. The user is going to provide you with a messy, unstructured course syllabus, outline, or list of topics.
 
@@ -37,15 +37,43 @@ Instructions:
 2. Group related topics into logical "modules".
 3. "estimatedMinutes" must be an integer (time to master the topic).
 4. "completed" must ALWAYS be false.
-5. Break large topics into sub-topics so no single topic exceeds 120 minutes.`;
+5. Break large topics into sub-topics so no single topic exceeds 120 minutes.
+
+ANTI-LAZINESS RULES (MANDATORY):
+- You MUST include EVERY topic and sub-topic from the provided syllabus. Do NOT skip, omit, summarise, or truncate any part of the input.
+- Do NOT stop generating mid-way. You MUST complete the ENTIRE JSON structure before finishing.
+- Do NOT add placeholder entries like "...more topics" or "etc." — write out every single item explicitly.
+- If the syllabus is long, that means the JSON will be long. That is expected and required.
+- Do NOT hallucinate topics that are not in the input. Only include what is actually provided.
+- Your response is INVALID if the JSON is incomplete, truncated, or missing topics from the original input.`;
 
 export default function CreateCourse() {
   const [content, setContent] = useState("");
   const [targetDate, setTargetDate] = useState("");
   const [weeklyHours, setWeeklyHours] = useState(10);
+  const [groupName, setGroupName] = useState("");
+  const [existingGroups, setExistingGroups] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("courses")
+        .select("group_name")
+        .eq("user_id", user.id)
+        .not("group_name", "is", null);
+      
+      if (data) {
+        const groups = Array.from(new Set(data.map(d => d.group_name).filter(Boolean)));
+        setExistingGroups(groups as string[]);
+      }
+    };
+    fetchGroups();
+  }, []);
 
   const handleCopyPrompt = () => {
     navigator.clipboard.writeText(PROMPT_TEMPLATE);
@@ -81,6 +109,7 @@ export default function CreateCourse() {
           syllabus: syllabusJson,
           target_completion_date: new Date(targetDate).toISOString(),
           weekly_hours_commitment: weeklyHours,
+          group_name: groupName.trim() || null,
           user_id: user.id
         }])
         .select()
@@ -127,7 +156,26 @@ export default function CreateCourse() {
         </button>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="modern-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6">
+          <label className="flex items-center gap-2 text-sm font-bold mb-4 text-neutral-700 dark:text-neutral-300">
+            <Folder size={18} /> Course Grouping
+          </label>
+          <input
+            type="text"
+            list="group-suggestions"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            placeholder="e.g. Fall Semester 2026"
+            className="w-full p-4 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 focus:border-neutral-500 outline-none font-bold bg-transparent"
+          />
+          <datalist id="group-suggestions">
+            {existingGroups.map((group) => (
+              <option key={group} value={group} />
+            ))}
+          </datalist>
+        </div>
+
         <div className="modern-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6">
           <label className="flex items-center gap-2 text-sm font-bold mb-4 text-neutral-700 dark:text-neutral-300">
             <Calendar size={18} /> Target Completion Date
@@ -143,7 +191,7 @@ export default function CreateCourse() {
         
         <div className="modern-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6">
           <label className="flex items-center gap-2 text-sm font-bold mb-4 text-neutral-700 dark:text-neutral-300">
-            <Clock size={18} /> Weekly Hours Commitment
+            <Clock size={18} /> Weekly Hours
           </label>
           <div className="flex items-center gap-4">
             <input

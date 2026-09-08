@@ -7,7 +7,7 @@ import TopicStudyModal from "@/components/TopicStudyModal";
 
 import { generateMasterTimetable } from "@/lib/timetable";
 
-export default function GroupSection({ groupName, courses, onDeleteCourse, defaultView = "courses" }: { groupName: string, courses: any[], onDeleteCourse: (id: string, e: React.MouseEvent) => void, defaultView?: "courses" | "timetable" }) {
+export default function GroupSection({ groupName, courses, onDeleteCourse, onEditCourse, defaultView = "courses" }: { groupName: string, courses: any[], onDeleteCourse: (id: string, e: React.MouseEvent) => void, onEditCourse?: (course: any, e: React.MouseEvent) => void, defaultView?: "courses" | "timetable" }) {
   const [view, setView] = useState<"courses" | "timetable">(defaultView);
   const [selectedTopic, setSelectedTopic] = useState<any>(null);
 
@@ -57,13 +57,24 @@ export default function GroupSection({ groupName, courses, onDeleteCourse, defau
                 href={`/courses/${course.id}`}
                 className="block modern-card bg-white dark:bg-[#34302d] border border-neutral-200 dark:border-neutral-700 p-6 hover:border-neutral-400 transition-colors relative group"
               >
-                <button 
-                  onClick={(e) => onDeleteCourse(course.id, e)}
-                  className="absolute top-4 right-4 text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full z-10"
-                  title="Delete Course Outline"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all z-10">
+                  {onEditCourse && (
+                    <button 
+                      onClick={(e) => onEditCourse(course, e)}
+                      className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full"
+                      title="Edit Course Outline"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    </button>
+                  )}
+                  <button 
+                    onClick={(e) => onDeleteCourse(course.id, e)}
+                    className="text-neutral-400 hover:text-red-500 bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full"
+                    title="Delete Course Outline"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
 
                 <h3 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 mb-2 pr-8">{course.title}</h3>
                 <div className="flex flex-col gap-1 text-sm font-medium text-neutral-500 mb-4">

@@ -12,6 +12,14 @@ Please generate 10-15 flashcards extracting the most critical definitions, conce
 Output ONLY in the following format with NO code blocks or markdown wrappers around the HTML tags:
 <Flashcard front="[Question]" back="[Answer]" />
 <Flashcard front="[Question]" back="[Answer]" />
+
+ANTI-LAZINESS RULES (MANDATORY):
+- You MUST generate ALL 10-15 flashcards in full. Do NOT stop early or generate fewer cards than requested.
+- Every single flashcard MUST use the exact <Flashcard front="..." back="..." /> format above. Do NOT use any other format.
+- Do NOT add any explanation, preamble, commentary, or markdown outside of the Flashcard tags.
+- Do NOT write placeholder cards like "[Add more as needed]" or truncate the list with "...".
+- Each "back" answer must be a complete, accurate explanation — not a one-word answer or vague summary.
+- Your response is INVALID if it contains fewer than 10 flashcards or deviates from the required tag format.
 `;
 
 export default function CreateDeckPage() {

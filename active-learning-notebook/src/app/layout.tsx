@@ -19,6 +19,9 @@ export const metadata: Metadata = {
 import { createClient } from "@/lib/supabase/server";
 import { NavBar } from "@/components/NavBar";
 import OnboardingModal from "@/components/OnboardingModal";
+import RouteProgressBar from "@/components/RouteProgressBar";
+import PageTransition from "@/components/PageTransition";
+import { Suspense } from "react";
 
 export default async function RootLayout({
   children,
@@ -40,10 +43,16 @@ export default async function RootLayout({
       </head>
       <body suppressHydrationWarning className="antialiased min-h-screen flex flex-col font-sans bg-neutral-50">
         <FontProvider>
+          {/* Slim orange progress bar on route change */}
+          <Suspense fallback={null}>
+            <RouteProgressBar />
+          </Suspense>
           <NavBar user={user} />
           {/* Main Content */}
           <main className="flex-grow max-w-5xl mx-auto w-full p-4 sm:p-6 lg:p-12">
-            {children}
+            <PageTransition>
+              {children}
+            </PageTransition>
           </main>
           
           {user && (!profile || !profile.is_onboarded) && (

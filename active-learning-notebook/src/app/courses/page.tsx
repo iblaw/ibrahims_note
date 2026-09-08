@@ -7,7 +7,9 @@ import Link from "next/link";
 import GroupSection from "@/components/GroupSection";
 import CreateScheduleModal from "@/components/CreateScheduleModal";
 import EditScheduleModal from "@/components/EditScheduleModal";
+import EditCourseModal from "@/components/EditCourseModal";
 import { Edit2 } from "lucide-react";
+import { CourseListSkeleton } from "@/components/Skeleton";
 
 export default function CoursesManager() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -16,6 +18,8 @@ export default function CoursesManager() {
   const [activeTab, setActiveTab] = useState<"outlines" | "timetables">("outlines");
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<any>(null);
+  const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [existingGroups, setExistingGroups] = useState<string[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -29,7 +33,11 @@ export default function CoursesManager() {
     const { data: coursesData } = await supabase.from("courses").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     const { data: schedulesData } = await supabase.from("schedules").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     
-    if (coursesData) setCourses(coursesData);
+    if (coursesData) {
+      setCourses(coursesData);
+      const groups = Array.from(new Set(coursesData.map((d: any) => d.group_name).filter(Boolean)));
+      setExistingGroups(groups as string[]);
+    }
     if (schedulesData) setSchedules(schedulesData);
     setLoading(false);
   };
@@ -40,6 +48,11 @@ export default function CoursesManager() {
     
     await supabase.from("courses").delete().eq("id", id);
     setCourses(courses.filter(c => c.id !== id));
+  };
+
+  const handleEditCourse = (course: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    setEditingCourse(course);
   };
 
   const deleteSchedule = async (id: string) => {
@@ -106,9 +119,7 @@ export default function CoursesManager() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-24">
-          <Loader2 className="animate-spin text-neutral-400" size={48} />
-        </div>
+        <CourseListSkeleton />
       ) : activeTab === "outlines" ? (
         courses.length === 0 ? (
           <div className="text-center py-24 bg-neutral-100 rounded-3xl border-2 border-dashed border-neutral-300">
@@ -128,6 +139,7 @@ export default function CoursesManager() {
                 groupName={groupName} 
                 courses={groupCourses as any[]} 
                 onDeleteCourse={deleteCourse} 
+                onEditCourse={handleEditCourse}
               />
             ))}
           </div>
@@ -189,6 +201,18 @@ export default function CoursesManager() {
           onClose={() => setEditingSchedule(null)} 
           onUpdated={() => {
             setEditingSchedule(null);
+            fetchData();
+          }}
+        />
+      )}
+
+      {editingCourse && (
+        <EditCourseModal 
+          course={editingCourse}
+          existingGroups={existingGroups}
+          onClose={() => setEditingCourse(null)}
+          onUpdated={() => {
+            setEditingCourse(null);
             fetchData();
           }}
         />

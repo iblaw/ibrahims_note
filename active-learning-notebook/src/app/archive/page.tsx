@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Library, Search, Loader2, ArrowRight, Share } from "lucide-react";
 import Link from "next/link";
 import DeleteNoteButton from "@/components/DeleteNoteButton";
+import { NoteListSkeleton } from "@/components/Skeleton";
 
 export default function MyNotes() {
   const [notes, setNotes] = useState<any[]>([]);
@@ -70,9 +71,7 @@ export default function MyNotes() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-24">
-          <Loader2 className="animate-spin text-neutral-400" size={48} />
-        </div>
+        <NoteListSkeleton />
       ) : filteredNotes.length === 0 ? (
         <div className="text-center py-24 bg-neutral-100 dark:bg-neutral-900/50 rounded-3xl border-2 border-dashed border-neutral-300 dark:border-neutral-700">
           <div className="w-32 h-32 mx-auto bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center text-neutral-400 dark:text-neutral-500 mb-6 shadow-inner">

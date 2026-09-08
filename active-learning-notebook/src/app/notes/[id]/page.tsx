@@ -49,9 +49,19 @@ export default async function ViewNote({ params }: { params: { id: string } }) {
     .order("created_at", { ascending: true });
 
   // Serialize the MDX content for the client component
-  const mdxSource = await serialize(note.content, {
-    parseFrontmatter: true,
-  });
+  let mdxSource: any = null;
+  let mdxError: string | null = null;
+  
+  try {
+    mdxSource = await serialize(note.content || "", {
+      parseFrontmatter: true,
+    });
+  } catch (err: any) {
+    console.error("MDX Compilation Error:", err);
+    mdxError = err.message || "Failed to parse markdown";
+    // Fallback: serialize a simple error message so the page still loads
+    mdxSource = await serialize(`> **Warning:** The markdown for this note contains invalid syntax that prevents it from rendering correctly. You can still click "Edit" to fix the raw text. \n\n**Error Details:**\n\`${mdxError}\``);
+  }
 
   const dateStr = new Date(note.created_at).toLocaleDateString("en-US", {
     month: "long",
