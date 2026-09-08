@@ -123,39 +123,6 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <div className="relative mb-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-neutral-200 dark:border-neutral-700"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-white dark:bg-[#34302d] text-neutral-500 font-bold">OR</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 mb-6">
-          <button 
-            onClick={async () => {
-              setLoading(true);
-              const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'facebook',
-                options: {
-                  redirectTo: `${window.location.origin}/auth/callback`,
-                },
-              });
-              if (error) {
-                setError(error.message);
-                setLoading(false);
-              }
-            }}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-[#1877F2] hover:bg-[#166FE5] text-white p-4 rounded-xl font-bold transition-colors disabled:opacity-50 shadow-sm"
-          >
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
-            Continue with Facebook
-          </button>
-        </div>
 
         <div className="text-center">
           <button 
