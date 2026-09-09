@@ -321,7 +321,12 @@ ANTI-LAZINESS RULES (MANDATORY):
             {selectedCourseId && (
               <select 
                 value={selectedTopic}
-                onChange={(e) => setSelectedTopic(e.target.value)}
+                onChange={(e) => {
+                  setSelectedTopic(e.target.value);
+                  if (e.target.value) {
+                    setTitle(e.target.value);
+                  }
+                }}
                 className="p-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-[#34302d] text-neutral-800 dark:text-neutral-200 outline-none font-medium flex-1 min-w-0 text-ellipsis"
               >
                 <option value="">-- Select Topic --</option>
