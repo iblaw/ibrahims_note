@@ -29,8 +29,11 @@ export async function middleware(request: NextRequest) {
 
   let user = null;
   try {
-    const { data } = await supabase.auth.getUser()
-    user = data.user;
+    // Optimization to prevent Vercel Edge 500 Timeouts: 
+    // We only call getSession instead of getUser to avoid network round-trips in middleware.
+    // Server components will still use getUser() for true security.
+    const { data } = await supabase.auth.getSession()
+    user = data.session?.user;
   } catch (error) {
     console.error("Middleware Auth Error:", error);
   }
