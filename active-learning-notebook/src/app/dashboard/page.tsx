@@ -18,6 +18,7 @@ export default function Dashboard() {
     totalCards: 0
   });
   const [userName, setUserName] = useState("");
+  const [profile, setProfile] = useState<any>(null);
   const [courses, setCourses] = useState<any[]>([]);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [editingSchedule, setEditingSchedule] = useState<any | null>(null);
@@ -25,7 +26,7 @@ export default function Dashboard() {
   const [suggestedNote, setSuggestedNote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedTopic, setSelectedTopic] = useState<any>(null);
-  const [burnoutWarning, setBurnoutWarning] = useState<{ active: boolean; required: number; allowed: number, dismissed?: boolean } | null>(null);
+  const [burnoutWarning, setBurnoutWarning] = useState<{ active: boolean; required: number; allowed: number, dismissed?: boolean, suggestedDate?: string } | null>(null);
   const [recentNotes, setRecentNotes] = useState<any[]>([]);
   const [hasSchedules, setHasSchedules] = useState(false);
 
@@ -37,6 +38,9 @@ export default function Dashboard() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     setUserName(user.user_metadata?.full_name || user.email?.split('@')[0] || "");
+    
+    const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+    if (profileData) setProfile(profileData);
 
     const { data: notesData } = await supabase.from("notes").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     const { data: cardsData } = await supabase.from("flashcards").select("*").eq("user_id", user.id);
@@ -60,68 +64,78 @@ export default function Dashboard() {
       if (schedulesData) setSchedules(schedulesData);
       setHasSchedules((schedulesData?.length ?? 0) > 0);
       
-      let totalRequiredHoursWeekly = 0;
-      let totalAllowedHoursWeekly = 0;
-      let firstUncompletedTopic: string | null = null;
+      let firstUncompletedTopic: any = null;
+      let allTodayTopics: any[] = [];
 
-      // Find first uncompleted topic across all courses
-      coursesData.forEach(course => {
-        course.syllabus?.modules?.forEach((m: any) => {
-          m.topics?.forEach((t: any) => {
-            if (!t.completed && !firstUncompletedTopic) {
-              firstUncompletedTopic = t.title;
-            }
-          });
-        });
-      });
-
-      if (schedulesData && schedulesData.length > 0) {
-        let allTodayTopics: any[] = [];
-
-        schedulesData.forEach(schedule => {
-          totalAllowedHoursWeekly += schedule.weekly_hours;
-          
-          let remainingMinutes = 0;
-          const scheduleCourses = coursesData.filter(c => schedule.course_ids.includes(c.id));
-          
-          // Generate timetable for this schedule to find what to study today (Day 0)
-          const timetable = generateMasterTimetable(scheduleCourses);
-          if (timetable.length > 0) {
-            allTodayTopics = [...allTodayTopics, ...timetable[0]];
-          }
-
-          // Sum up minutes for courses in this schedule for burnout warning
-          scheduleCourses.forEach(course => {
+      // NEW BURNOUT CALCULATION
+      let totalRequiredMinutes = 0;
+      let earliestTargetDate = new Date(8640000000000000); // Max date
+      
+      (schedulesData || []).forEach(schedule => {
+          const scheduleCourses = coursesData.filter((c: any) => schedule.course_ids.includes(c.id));
+          scheduleCourses.forEach((course: any) => {
             course.syllabus?.modules?.forEach((m: any) => {
               m.topics?.forEach((t: any) => {
                 if (!t.completed) {
-                  remainingMinutes += t.estimatedMinutes || 0;
+                  totalRequiredMinutes += t.estimatedMinutes || 60;
+                  if (!firstUncompletedTopic) firstUncompletedTopic = t.title;
                 }
               });
             });
           });
+          const tDate = new Date(schedule.target_date);
+          if (tDate < earliestTargetDate) earliestTargetDate = tDate;
 
-          const targetDate = new Date(schedule.target_date);
-          const now = new Date();
-          const daysRemaining = Math.max(1, (targetDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
-          const weeksRemaining = daysRemaining / 7;
-
-          if (weeksRemaining > 0) {
-            totalRequiredHoursWeekly += (remainingMinutes / 60) / weeksRemaining;
+          // Generate timetable for today
+          const timetable = generateMasterTimetable(scheduleCourses, profileData || undefined);
+          if (timetable.length > 0) {
+            allTodayTopics = [...allTodayTopics, ...timetable[0]];
           }
-        });
+      });
+      
+      setTodayTopics(allTodayTopics);
 
-        setTodayTopics(allTodayTopics);
-
-        if (totalRequiredHoursWeekly > totalAllowedHoursWeekly) {
-          const dismissedHoursStr = localStorage.getItem('dismissedBurnoutHours');
-          const isHidden = dismissedHoursStr && totalRequiredHoursWeekly <= parseFloat(dismissedHoursStr) + 0.1;
+      if (totalRequiredMinutes > 0 && earliestTargetDate.getTime() !== 8640000000000000) {
+        const now = new Date();
+        const daysRemaining = Math.max(1, Math.ceil((earliestTargetDate.getTime() - now.getTime()) / (1000 * 3600 * 24)));
+        
+        // Calculate active days
+        let activeDays = 0;
+        const studyDays = profileData?.study_days || ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        
+        for (let i = 0; i < daysRemaining; i++) {
+          const d = new Date(now);
+          d.setDate(d.getDate() + i);
+          if (studyDays.includes(dayNames[d.getDay()])) {
+            activeDays++;
+          }
+        }
+        
+        // If they skipped every single day before the deadline, activeDays is 0. Give them at least 1 to avoid infinity.
+        activeDays = Math.max(1, activeDays);
+        
+        const dailyRequiredHours = (totalRequiredMinutes / 60) / activeDays;
+        const dailyGoalHours = profileData?.daily_study_goal_hours || 2;
+        
+        if (dailyRequiredHours > dailyGoalHours) {
+          const dismissedStr = localStorage.getItem('dismissedBurnoutDailyHours');
+          const isHidden = dismissedStr && dailyRequiredHours <= parseFloat(dismissedStr) + 0.1;
           
           if (!isHidden) {
+            // Calculate suggested new date
+            const suggestedActiveDaysNeeded = Math.ceil((totalRequiredMinutes / 60) / dailyGoalHours);
+            // Approximate calendar days needed by assuming the same ratio of active vs skipped days
+            const ratio = studyDays.length / 7;
+            const calendarDaysNeeded = Math.ceil(suggestedActiveDaysNeeded / ratio);
+            const suggestedDate = new Date();
+            suggestedDate.setDate(suggestedDate.getDate() + calendarDaysNeeded);
+            
             setBurnoutWarning({
               active: true,
-              required: Math.round(totalRequiredHoursWeekly),
-              allowed: totalAllowedHoursWeekly
+              required: Math.round(dailyRequiredHours * 10) / 10,
+              allowed: dailyGoalHours,
+              suggestedDate: suggestedDate.toISOString().split('T')[0]
             });
           }
         }
@@ -175,7 +189,7 @@ export default function Dashboard() {
               <div>
                 <h3 className="text-xl font-bold text-red-800 dark:text-red-300 mb-1">Burnout Warning 🚨</h3>
                 <p className="text-red-700 dark:text-red-400 font-medium">
-                  You committed to <strong>{burnoutWarning.allowed} hours/week</strong> of study, but to hit your deadlines you need to study <strong>{burnoutWarning.required} hours/week</strong>. Consider pushing your deadlines back or increasing your weekly commitment!
+                  Your daily goal is <strong>{burnoutWarning.allowed} hours</strong> on active study days, but to hit your deadlines you need to study <strong>{burnoutWarning.required} hours/day</strong>. Consider pushing your deadlines back or increasing your weekly commitment!
                 </p>
                 <div className="flex flex-wrap items-center gap-4 mt-3">
                   {schedules.length > 0 && (
@@ -192,7 +206,7 @@ export default function Dashboard() {
                   <button 
                     onClick={() => {
                       setBurnoutWarning({ ...burnoutWarning, dismissed: true });
-                      localStorage.setItem('dismissedBurnoutHours', burnoutWarning.required.toString());
+                      localStorage.setItem('dismissedBurnoutDailyHours', burnoutWarning.required.toString());
                     }}
                     className="text-sm font-bold text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 underline underline-offset-2"
                   >

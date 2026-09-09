@@ -1,5 +1,16 @@
-export const generateMasterTimetable = (courses: any[]) => {
-  // 1. Gather all uncompleted topics, tagged by their course
+export const generateMasterTimetable = (
+  courses: any[], 
+  profileSettings?: {
+    daily_study_goal_hours?: number;
+    study_days?: string[];
+    busyness?: string;
+  }
+) => {
+  // Default settings if profile not provided
+  const dailyGoalHours = profileSettings?.daily_study_goal_hours || 2;
+  const studyDays = profileSettings?.study_days || ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+  // 1. Gather all uncompleted topics
   const allTopics: { courseName: string, courseId: string, topicTitle: string, estimatedMinutes: number }[] = [];
   
   courses.forEach(course => {
@@ -17,15 +28,13 @@ export const generateMasterTimetable = (courses: any[]) => {
     });
   });
 
-  // 2. Group them back by course for easy popping (round-robin)
   const topicsByCourse: Record<string, typeof allTopics> = {};
   allTopics.forEach(t => {
     if (!topicsByCourse[t.courseId]) topicsByCourse[t.courseId] = [];
     topicsByCourse[t.courseId].push(t);
   });
 
-  // 3. Build days
-  const maxMinsPerDay = 4 * 60; // 4 hours a day limit
+  const maxMinsPerDay = dailyGoalHours * 60;
   const days: any[][] = [];
   let currentDay: any[] = [];
   let currentDayMins = 0;
@@ -33,9 +42,25 @@ export const generateMasterTimetable = (courses: any[]) => {
   const courseIds = Object.keys(topicsByCourse);
   let allEmpty = false;
 
+  // We need to keep track of the actual calendar date so we know if it's a study day
+  let currentDate = new Date();
+  
+  // Helper to check if a date is a study day
+  const isStudyDay = (date: Date) => {
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayName = dayNames[date.getDay()];
+    return studyDays.includes(dayName);
+  };
+
   while (!allEmpty) {
     allEmpty = true;
     let addedThisRound = false;
+
+    // Advance to the next valid study day
+    while (!isStudyDay(currentDate)) {
+      days.push([]); // Push an empty day to represent the rest day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
 
     for (const cId of courseIds) {
       if (topicsByCourse[cId].length > 0) {
@@ -47,6 +72,13 @@ export const generateMasterTimetable = (courses: any[]) => {
           days.push([...currentDay]);
           currentDay = [];
           currentDayMins = 0;
+          currentDate.setDate(currentDate.getDate() + 1);
+          
+          // Fast-forward through rest days again
+          while (!isStudyDay(currentDate)) {
+            days.push([]);
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
         }
         
         // Pop and add
@@ -61,6 +93,7 @@ export const generateMasterTimetable = (courses: any[]) => {
       days.push([...currentDay]);
       currentDay = [];
       currentDayMins = 0;
+      currentDate.setDate(currentDate.getDate() + 1);
     }
   }
 
