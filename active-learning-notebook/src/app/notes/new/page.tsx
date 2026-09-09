@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { Sparkles, Loader2, Copy, Check, Link as LinkIcon, Smartphone, Monitor } from "lucide-react";
+import { Sparkles, Loader2, Copy, Check, Link as LinkIcon, Smartphone, Monitor, X, Search } from "lucide-react";
 
 import Editor, { useMonaco } from "@monaco-editor/react";
 import { validateMdx } from "@/app/actions/validateMdx";
@@ -20,6 +20,7 @@ export default function CreateNote() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [availableTopics, setAvailableTopics] = useState<string[]>([]);
+  const [topicSearch, setTopicSearch] = useState("");
 
   const [profile, setProfile] = useState<any>(null);
   
@@ -320,40 +321,71 @@ ANTI-LAZINESS RULES (MANDATORY):
           </div>
 
           {selectedCourseId && availableTopics.length > 0 && (
-              <div className="mt-4">
-                <p className="text-sm font-bold text-blue-700 dark:text-blue-400 mb-2">Select Topics to Link:</p>
-                <div className="flex flex-wrap gap-2">
-                  {availableTopics.map(t => {
-                    const isSelected = selectedTopics.includes(t);
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => {
-                          if (isSelected) {
-                            setSelectedTopics(prev => prev.filter(x => x !== t));
-                          } else {
-                            setSelectedTopics(prev => {
-                              const next = [...prev, t];
-                              if (next.length === 1) setTitle(t);
-                              return next;
-                            });
-                          }
-                        }}
-                        className={`px-3 py-1.5 rounded-full text-sm font-bold transition-colors ${
-                          isSelected 
-                            ? 'bg-blue-600 text-white shadow-md' 
-                            : 'bg-white dark:bg-[#34302d] text-blue-700 dark:text-blue-300 border-2 border-blue-200 dark:border-blue-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/30'
-                        }`}
-                      >
-                        {t}
-                      </button>
-                    )
-                  })}
+            <div className="mt-4">
+              <p className="text-sm font-bold text-blue-700 dark:text-blue-400 mb-2">Selected Topics:</p>
+              
+              {/* Selected Topics List */}
+              {selectedTopics.length > 0 ? (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {selectedTopics.map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setSelectedTopics(prev => prev.filter(x => x !== t))}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-full text-sm font-bold shadow-md hover:bg-red-500 transition-colors group"
+                    >
+                      {t}
+                      <X size={14} className="opacity-70 group-hover:opacity-100" />
+                    </button>
+                  ))}
                 </div>
+              ) : (
+                <p className="text-xs text-blue-600/70 dark:text-blue-400/70 italic mb-4">No topics selected yet.</p>
+              )}
+
+              {/* Topic Search */}
+              <div className="relative mb-3">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search size={16} className="text-blue-400 dark:text-blue-600" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search available topics..."
+                  value={topicSearch}
+                  onChange={(e) => setTopicSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-[#34302d] text-neutral-800 dark:text-neutral-200 outline-none font-medium text-sm focus:border-blue-400 dark:focus:border-blue-600 transition-colors"
+                />
               </div>
-            )}
-          </div>
+
+              {/* Filtered Available Topics */}
+              <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1">
+                {availableTopics
+                  .filter(t => !selectedTopics.includes(t))
+                  .filter(t => t.toLowerCase().includes(topicSearch.toLowerCase()))
+                  .map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTopics(prev => {
+                          const next = [...prev, t];
+                          if (next.length === 1 && !title) setTitle(t);
+                          return next;
+                        });
+                        setTopicSearch(""); // Clear search after selection
+                      }}
+                      className="px-3 py-1.5 rounded-full text-sm font-bold transition-colors bg-white dark:bg-[#34302d] text-blue-700 dark:text-blue-300 border-2 border-blue-200 dark:border-blue-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                    >
+                      {t}
+                    </button>
+                  ))}
+                  {availableTopics.filter(t => !selectedTopics.includes(t) && t.toLowerCase().includes(topicSearch.toLowerCase())).length === 0 && (
+                    <p className="text-xs text-neutral-500 italic">No topics match your search.</p>
+                  )}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div>
           <div className="flex items-center justify-between mb-2">
