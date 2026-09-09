@@ -29,7 +29,15 @@ export default function ExamModePage() {
     let total = 0;
     const quizRegex = /<Quiz\s+question=/g;
     notesData.forEach(note => {
-      if (selectedTopics.includes(note.course_topic)) {
+      let isMatch = false;
+      if (!note.course_topic) isMatch = false;
+      else if (note.course_topic.startsWith('[')) {
+        try { isMatch = JSON.parse(note.course_topic).some((t: string) => selectedTopics.includes(t)); } catch { isMatch = false; }
+      } else {
+        isMatch = selectedTopics.includes(note.course_topic);
+      }
+      
+      if (isMatch) {
         const matches = note.content.match(quizRegex);
         if (matches) total += matches.length;
       }
@@ -53,7 +61,7 @@ export default function ExamModePage() {
 
     const [coursesRes, notesRes, savedExamsRes] = await Promise.all([
       supabase.from("courses").select("*").eq("user_id", user.id),
-      supabase.from("notes").select("course_topic, content").eq("user_id", user.id),
+      supabase.from("notes").select("id, course_topic, content").eq("user_id", user.id),
       supabase.from("notes").select("id, title, created_at, is_public").in("course_topic", ["SHARED_EXAM", "GRAND_EXAM"]).eq("user_id", user.id).order('created_at', { ascending: false })
     ]);
 
@@ -64,7 +72,11 @@ export default function ExamModePage() {
       setNotesData(notesRes.data);
       notesRes.data.forEach((note: any) => {
         if (note.course_topic && note.content && quizRegex.test(note.content)) {
-          valid.add(note.course_topic);
+          if (note.course_topic.startsWith('[')) {
+             try { JSON.parse(note.course_topic).forEach((t: string) => valid.add(t)); } catch {}
+          } else {
+             valid.add(note.course_topic);
+          }
         }
       });
     }
@@ -79,19 +91,20 @@ export default function ExamModePage() {
     if (selectedTopics.length === 0) return alert("Select at least one topic");
     
     setGenerating(true);
-    const { data: { user } } = await supabase.auth.getUser();
 
-    // Fetch notes for the selected topics to extract quizzes
-    const { data: notes } = await supabase
-      .from("notes")
-      .select("id, content")
-      .eq("user_id", user?.id)
-      .in("course_topic", selectedTopics);
+    // Filter notes directly from state since we already fetched them in fetchData
+    const matchingNotes = notesData.filter(note => {
+      if (!note.course_topic) return false;
+      if (note.course_topic.startsWith('[')) {
+        try { return JSON.parse(note.course_topic).some((t: string) => selectedTopics.includes(t)); } catch { return false; }
+      }
+      return selectedTopics.includes(note.course_topic);
+    });
 
     const extractedQuizzes: any[] = [];
     const quizRegex = /<Quiz\s+question="([^"]+)"\s+options="([^"]+)"\s+answer="([^"]+)"\s*\/?>(?:<\/Quiz>)?/g;
 
-    notes?.forEach(note => {
+    matchingNotes.forEach(note => {
       let match;
       while ((match = quizRegex.exec(note.content)) !== null) {
         extractedQuizzes.push({

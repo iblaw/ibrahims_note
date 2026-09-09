@@ -23,7 +23,7 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
   // Linking state
   const [courses, setCourses] = useState<any[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
-  const [selectedTopic, setSelectedTopic] = useState<string>("");
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [availableTopics, setAvailableTopics] = useState<string[]>([]);
 
   // Validation State
@@ -118,7 +118,7 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
       title,
       content: content,
       course_id: selectedCourseId || null,
-      course_topic: selectedTopic || null
+      course_topic: selectedTopics.length > 0 ? JSON.stringify(selectedTopics) : null
     }).eq("id", noteId);
     
     router.push(`/notes/${noteId}`);
@@ -185,25 +185,42 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
               <option key={c.id} value={c.id}>{c.title}</option>
             ))}
           </select>
-
-          {selectedCourseId && (
-            <select 
-              value={selectedTopic}
-              onChange={(e) => {
-                setSelectedTopic(e.target.value);
-                if (e.target.value) {
-                  setTitle(e.target.value);
-                }
-              }}
-              className="p-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-[#34302d] text-neutral-800 dark:text-neutral-200 outline-none font-medium flex-grow"
-            >
-              <option value="">-- Select Topic --</option>
-              {availableTopics.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          )}
         </div>
+
+        {selectedCourseId && availableTopics.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-bold text-blue-700 dark:text-blue-400 mb-2">Select Topics to Link:</p>
+            <div className="flex flex-wrap gap-2">
+              {availableTopics.map(t => {
+                const isSelected = selectedTopics.includes(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedTopics(prev => prev.filter(x => x !== t));
+                      } else {
+                        setSelectedTopics(prev => {
+                          const next = [...prev, t];
+                          if (next.length === 1) setTitle(t);
+                          return next;
+                        });
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-sm font-bold transition-colors ${
+                      isSelected 
+                        ? 'bg-blue-600 text-white shadow-md' 
+                        : 'bg-white dark:bg-[#34302d] text-blue-700 dark:text-blue-300 border-2 border-blue-200 dark:border-blue-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/30'
+                    }`}
+                  >
+                    {t}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">

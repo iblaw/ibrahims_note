@@ -209,7 +209,15 @@ export default function CourseView({ params }: { params: Promise<{ id: string }>
             
             <div className="space-y-3">
               {module.topics?.map((topic: any, tIndex: number) => {
-                const linkedNote = linkedNotes.find(n => n.course_topic === topic.title);
+                const linkedTopicNotes = linkedNotes.filter(n => {
+                  if (!n.course_topic) return false;
+                  if (n.course_topic.startsWith('[')) {
+                    try {
+                      return JSON.parse(n.course_topic).includes(topic.title);
+                    } catch { return false; }
+                  }
+                  return n.course_topic === topic.title;
+                });
                 
                 return (
                   <div key={tIndex} className="flex items-start gap-4 p-3 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 rounded-xl transition-colors group">
@@ -226,10 +234,14 @@ export default function CourseView({ params }: { params: Promise<{ id: string }>
                       {topic.description && (
                         <p className="text-neutral-500 text-sm font-medium mt-1">{topic.description}</p>
                       )}
-                      {linkedNote && (
-                        <Link href={`/notes/${linkedNote.id}`} className="inline-flex items-center gap-1 mt-2 text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
-                          <LinkIcon size={12} /> View Note: {linkedNote.title}
-                        </Link>
+                      {linkedTopicNotes.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {linkedTopicNotes.map(linkedNote => (
+                            <Link key={linkedNote.id} href={`/notes/${linkedNote.id}`} className="inline-flex items-center gap-1 text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
+                              <LinkIcon size={12} /> Note: {linkedNote.title}
+                            </Link>
+                          ))}
+                        </div>
                       )}
                     </div>
                     <div className="text-right shrink-0">
@@ -287,33 +299,48 @@ export default function CourseView({ params }: { params: Promise<{ id: string }>
                   </div>
                   
                   <div className="space-y-4">
-                    {weekTopics.map((topic: any, i: number) => {
-                      const linkedNote = linkedNotes.find(n => n.course_topic === topic.title);
-                      
-                      return (
-                        <div key={i} className="flex items-start gap-4 group">
-                          <button 
-                            onClick={() => toggleTopic(topic.mIndex, topic.tIndex)}
-                            className={`mt-1 shrink-0 ${topic.completed ? 'text-green-500' : 'text-neutral-300 dark:text-neutral-600 group-hover:text-neutral-400'}`}
-                          >
-                            {topic.completed ? <CheckCircle2 size={24} /> : <Circle size={24} />}
-                          </button>
-                          <div className="flex-grow">
-                            <h4 className={`text-lg font-bold ${topic.completed ? 'text-neutral-500 line-through' : 'text-neutral-800 dark:text-neutral-200'}`}>
-                              {topic.title}
-                            </h4>
-                            <p className="text-xs font-bold text-blue-500 dark:text-blue-400 mt-1 uppercase tracking-wider">
-                              From: {topic.moduleTitle}
-                            </p>
-                            {linkedNote && (
-                              <Link href={`/notes/${linkedNote.id}`} className="inline-flex items-center gap-1 mt-2 text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
-                                <LinkIcon size={12} /> View Note
-                              </Link>
-                            )}
+                      {weekTopics.map((topic: any, i: number) => {
+                        const linkedTopicNotes = linkedNotes.filter(n => {
+                          if (!n.course_topic) return false;
+                          if (n.course_topic.startsWith('[')) {
+                            try { return JSON.parse(n.course_topic).includes(topic.title); } catch { return false; }
+                          }
+                          return n.course_topic === topic.title;
+                        });
+                        
+                        return (
+                          <div key={i} className="flex items-start gap-4 group">
+                            <button 
+                              onClick={() => toggleTopic(topic.mIndex, topic.tIndex)}
+                              className={`mt-1 shrink-0 ${topic.completed ? 'text-green-500' : 'text-neutral-300 dark:text-neutral-600 group-hover:text-neutral-400'}`}
+                            >
+                              {topic.completed ? <CheckCircle2 size={24} /> : <Circle size={24} />}
+                            </button>
+                            <div className="flex-grow">
+                              <h4 className={`font-bold ${topic.completed ? 'text-neutral-500 line-through' : 'text-neutral-800 dark:text-neutral-200'}`}>
+                                {topic.title}
+                              </h4>
+                              <p className="text-xs font-bold text-blue-500 dark:text-blue-400 mt-1 uppercase tracking-wider">
+                                From: {topic.moduleTitle}
+                              </p>
+                              {linkedTopicNotes.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {linkedTopicNotes.map(linkedNote => (
+                                    <Link key={linkedNote.id} href={`/notes/${linkedNote.id}`} className="inline-flex items-center gap-1 text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
+                                      <LinkIcon size={12} /> Note: {linkedNote.title}
+                                    </Link>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className="text-xs font-bold text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded-lg">
+                                {topic.estimatedMinutes}m
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                   </div>
                 </div>
               );

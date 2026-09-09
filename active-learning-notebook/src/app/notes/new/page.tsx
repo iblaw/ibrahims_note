@@ -18,7 +18,7 @@ export default function CreateNote() {
   // Linking state
   const [courses, setCourses] = useState<any[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
-  const [selectedTopic, setSelectedTopic] = useState<string>("");
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [availableTopics, setAvailableTopics] = useState<string[]>([]);
 
   const [profile, setProfile] = useState<any>(null);
@@ -49,7 +49,7 @@ export default function CreateNote() {
 
     if (courseIdParam) setSelectedCourseId(courseIdParam);
     if (topicParam) {
-      setSelectedTopic(topicParam);
+      setSelectedTopics([topicParam]);
       setTitle(topicParam); // Auto-title the note with the topic name
     }
   }, []);
@@ -87,8 +87,8 @@ export default function CreateNote() {
     }
 
     let topicInstruction = "";
-    if (selectedTopic) {
-      topicInstruction = `\n\n*** TARGET TOPIC ***\nThe user is requesting a note specifically on the topic: "${selectedTopic}".\nEnsure the generated Note Document focuses completely on explaining this topic accurately and thoroughly.`;
+    if (selectedTopics.length > 0) {
+      topicInstruction = `\n\n*** TARGET TOPIC ***\nThe user is requesting a note specifically on the following topics: "${selectedTopics.join(', ')}".\nEnsure the generated Note Document focuses completely on explaining these topics accurately and thoroughly.`;
     }
 
     let personaInstruction = "";
@@ -215,7 +215,7 @@ ANTI-LAZINESS RULES (MANDATORY):
           content,
           user_id: user?.id,
           course_id: selectedCourseId || null,
-          course_topic: selectedTopic || null
+          course_topic: selectedTopics.length > 0 ? JSON.stringify(selectedTopics) : null
         }])
         .select()
         .single();
@@ -232,7 +232,7 @@ ANTI-LAZINESS RULES (MANDATORY):
           user_id: user?.id,
           front: match[1],
           back: match[2],
-          topic: selectedTopic || null,
+          topic: selectedTopics.length > 0 ? JSON.stringify(selectedTopics) : null,
           ease_factor: 2.5,
           interval: 0,
           repetitions: 0,
@@ -317,26 +317,43 @@ ANTI-LAZINESS RULES (MANDATORY):
                 <option key={c.id} value={c.id}>{c.title}</option>
               ))}
             </select>
+          </div>
 
-            {selectedCourseId && (
-              <select 
-                value={selectedTopic}
-                onChange={(e) => {
-                  setSelectedTopic(e.target.value);
-                  if (e.target.value) {
-                    setTitle(e.target.value);
-                  }
-                }}
-                className="p-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-[#34302d] text-neutral-800 dark:text-neutral-200 outline-none font-medium flex-1 min-w-0 text-ellipsis"
-              >
-                <option value="">-- Select Topic --</option>
-                {availableTopics.map(t => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
+          {selectedCourseId && availableTopics.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm font-bold text-blue-700 dark:text-blue-400 mb-2">Select Topics to Link:</p>
+                <div className="flex flex-wrap gap-2">
+                  {availableTopics.map(t => {
+                    const isSelected = selectedTopics.includes(t);
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedTopics(prev => prev.filter(x => x !== t));
+                          } else {
+                            setSelectedTopics(prev => {
+                              const next = [...prev, t];
+                              if (next.length === 1) setTitle(t);
+                              return next;
+                            });
+                          }
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-sm font-bold transition-colors ${
+                          isSelected 
+                            ? 'bg-blue-600 text-white shadow-md' 
+                            : 'bg-white dark:bg-[#34302d] text-blue-700 dark:text-blue-300 border-2 border-blue-200 dark:border-blue-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/30'
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             )}
           </div>
-        </div>
 
         <div>
           <div className="flex items-center justify-between mb-2">

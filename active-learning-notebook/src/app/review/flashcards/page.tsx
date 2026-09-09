@@ -32,13 +32,17 @@ export default function GrandFlashcardsModePage() {
   const maxAvailableCards = useMemo(() => {
     let total = 0;
     const selectedNoteIds = notesData
-      .filter(n => selectedTopics.includes(n.course_topic))
+      .filter(n => {
+        if (!n.course_topic) return false;
+        if (n.course_topic.startsWith('[')) {
+          try { return JSON.parse(n.course_topic).some((t: string) => selectedTopics.includes(t)); } catch { return false; }
+        }
+        return selectedTopics.includes(n.course_topic);
+      })
       .map(n => n.id);
       
     flashcardsData.forEach(card => {
-      if (selectedNoteIds.includes(card.note_id)) {
-        total += 1;
-      }
+      if (selectedNoteIds.includes(card.note_id)) total++;
     });
     return total;
   }, [notesData, flashcardsData, selectedTopics]);
@@ -66,16 +70,25 @@ export default function GrandFlashcardsModePage() {
 
     const valid = new Set<string>();
     
-    if (notesRes.data && flashcardsRes.data) {
+    if (notesRes.data) {
       setNotesData(notesRes.data);
+    }
+    
+    if (flashcardsRes.data && notesRes.data) {
       setFlashcardsData(flashcardsRes.data);
       
       const noteTopicsMap = new Map<string, string>();
       notesRes.data.forEach((note: any) => noteTopicsMap.set(note.id, note.course_topic));
       
       flashcardsRes.data.forEach((card: any) => {
-        const topic = noteTopicsMap.get(card.note_id);
-        if (topic) valid.add(topic);
+        const topicRaw = noteTopicsMap.get(card.note_id);
+        if (topicRaw && topicRaw !== "SHARED_FLASHCARDS" && topicRaw !== "GRAND_EXAM" && topicRaw !== "SHARED_EXAM") {
+          if (topicRaw.startsWith('[')) {
+            try { JSON.parse(topicRaw).forEach((t: string) => valid.add(t)); } catch {}
+          } else {
+            valid.add(topicRaw);
+          }
+        }
       });
     }
 
@@ -91,7 +104,13 @@ export default function GrandFlashcardsModePage() {
     setGenerating(true);
 
     const selectedNoteIds = notesData
-      .filter(n => selectedTopics.includes(n.course_topic))
+      .filter(n => {
+        if (!n.course_topic) return false;
+        if (n.course_topic.startsWith('[')) {
+          try { return JSON.parse(n.course_topic).some((t: string) => selectedTopics.includes(t)); } catch { return false; }
+        }
+        return selectedTopics.includes(n.course_topic);
+      })
       .map(n => n.id);
       
     const availableCards = flashcardsData.filter(card => selectedNoteIds.includes(card.note_id));
