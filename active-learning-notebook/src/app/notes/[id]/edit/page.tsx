@@ -50,7 +50,13 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
       setTitle(note.title);
       setContent(note.content);
       setSelectedCourseId(note.course_id || "");
-      setSelectedTopic(note.course_topic || "");
+      if (note.course_topic) {
+        if (note.course_topic.startsWith('[')) {
+          try { setSelectedTopics(JSON.parse(note.course_topic)); } catch { setSelectedTopics([note.course_topic]); }
+        } else {
+          setSelectedTopics([note.course_topic]);
+        }
+      }
     }
 
     if (userCourses) {
