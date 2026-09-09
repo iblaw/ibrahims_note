@@ -27,9 +27,13 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user;
+  } catch (error) {
+    console.error("Middleware Auth Error:", error);
+  }
 
   const pathname = request.nextUrl.pathname;
 
@@ -45,7 +49,9 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/notes') ||
     pathname.startsWith('/courses') ||
     pathname.startsWith('/archive') ||
-    pathname.startsWith('/review');
+    pathname.startsWith('/review') ||
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/profile');
 
   if (isInternalRoute && !isPublicShareRoute && !user) {
     const url = request.nextUrl.clone()
