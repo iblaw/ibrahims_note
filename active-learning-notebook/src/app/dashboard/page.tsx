@@ -8,6 +8,7 @@ import { generateMasterTimetable } from "@/lib/timetable";
 import TopicStudyModal from "@/components/TopicStudyModal";
 import EditScheduleModal from "@/components/EditScheduleModal";
 import { DashboardSkeleton } from "@/components/Skeleton";
+import DailyBriefing from "@/components/DailyBriefing";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -16,6 +17,7 @@ export default function Dashboard() {
     totalNotes: 0,
     totalCards: 0
   });
+  const [userName, setUserName] = useState("");
   const [courses, setCourses] = useState<any[]>([]);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [editingSchedule, setEditingSchedule] = useState<any | null>(null);
@@ -34,6 +36,7 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
+    setUserName(user.user_metadata?.full_name || user.email?.split('@')[0] || "");
 
     const { data: notesData } = await supabase.from("notes").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     const { data: cardsData } = await supabase.from("flashcards").select("*").eq("user_id", user.id);
@@ -154,21 +157,15 @@ export default function Dashboard() {
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
       
-      {/* Lumen Greeting Header */}
-      <div className="bg-gradient-to-r from-orange-400 to-amber-500 rounded-3xl p-8 sm:p-10 flex flex-col sm:flex-row items-center gap-8 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center border-4 border-white dark:border-[#2a2624] shadow-2xl z-10 text-orange-500">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-16 sm:h-16"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
-        </div>
-        <div className="text-white z-10 text-center sm:text-left">
-          <h1 className="text-xl sm:text-xl font-extrabold mb-2 tracking-tight text-white drop-shadow-md">
-            {greeting}
-          </h1>
-          <p className="text-xl text-orange-50 font-medium max-w-2xl">
-            Lumen is ready to help you crush your learning goals today. Let's review those flashcards and dive into your master timetable!
-          </p>
-        </div>
-      </div>
+      {/* AI Daily Briefing Header */}
+      {!loading && (
+        <DailyBriefing 
+          stats={stats} 
+          todayTopics={todayTopics} 
+          name={userName} 
+          coursesCount={courses.length} 
+        />
+      )}
 
       {/* Burnout Warning */}
       {burnoutWarning?.active && !burnoutWarning.dismissed && (
