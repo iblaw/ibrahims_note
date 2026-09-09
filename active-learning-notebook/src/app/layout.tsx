@@ -56,7 +56,7 @@ export default async function RootLayout({
           </main>
           
           {user && (!profile || !profile.is_onboarded) && (
-            <OnboardingModal userId={user.id} />
+            <OnboardingModal userId={user.id} initialUsername={profile?.username || user.user_metadata?.username || ""} />
           )}
           
           <footer className="w-full text-center py-8 text-neutral-500 font-medium text-sm border-t border-neutral-200 dark:border-neutral-800 mt-auto bg-white dark:bg-[#34302d]">

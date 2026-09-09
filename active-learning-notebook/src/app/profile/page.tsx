@@ -8,9 +8,10 @@ import { useRouter } from "next/navigation";
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [stats, setStats] = useState({ notes: 0, courses: 0, flashcards: 0 });
   const [loading, setLoading] = useState(true);
+  const [showRestTooltip, setShowRestTooltip] = useState(false);
 
   // Edit Username State
   const [isEditingUsername, setIsEditingUsername] = useState(false);
@@ -253,15 +254,23 @@ export default function ProfilePage() {
           </div>
 
           
-          <h3 className="text-xl font-bold text-neutral-800 mt-10">Study & Burnout Preferences</h3>
-          
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-2xl border-2 border-blue-200 dark:border-blue-800/50 mb-6">
-            <h4 className="font-bold text-blue-800 dark:text-blue-300 flex items-center gap-2 mb-2">
-              <Sparkles size={18} /> The Science of Rest
-            </h4>
-            <p className="text-sm text-blue-700 dark:text-blue-400 leading-relaxed">
-              Cognitive burnout is the #1 reason students miss their deadlines. Lumen uses spaced repetition and cognitive load theory to build your master timetable. Tell us your ideal study days below, and we will automatically weave in necessary rest periods so you learn faster without burning out.
-            </p>
+          <div className="relative mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <h3 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">Study & Burnout Preferences</h3>
+            <button 
+              onClick={() => setShowRestTooltip(!showRestTooltip)}
+              className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+              title="The Science of Rest"
+            >
+              <span className="font-bold text-xs">?</span>
+            </button>
+            
+            {showRestTooltip && (
+              <div className="absolute top-8 left-0 sm:left-48 z-20 w-80 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-xl rounded-xl p-4 text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed animate-in fade-in slide-in-from-top-2">
+                <div className="absolute -top-2 left-4 w-4 h-4 bg-white dark:bg-neutral-800 border-l border-t border-neutral-200 dark:border-neutral-700 rotate-45"></div>
+                <strong className="text-blue-600 dark:text-blue-400 block mb-1">The Science of Rest</strong>
+                Cognitive burnout is the #1 reason students miss their deadlines. Lumen uses spaced repetition and cognitive load theory to build your master timetable. Tell us your ideal study days below, and we will automatically weave in necessary rest periods so you learn faster without burning out.
+              </div>
+            )}
           </div>
 
           <div className="modern-card space-y-6">

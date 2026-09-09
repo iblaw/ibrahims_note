@@ -5,18 +5,29 @@ import { supabase } from "@/lib/supabase";
 import { BookOpen, BrainCircuit, Clock, Sparkles, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function OnboardingModal({ userId }: { userId: string }) {
+export default function OnboardingModal({ userId, initialUsername }: { userId: string, initialUsername?: string }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
-  const [preferences, setPreferences] = useState({
-    username: "",
+  const [preferences, setPreferences] = useState<{
+    username: string;
+    profession: string;
+    quiz_preference: string;
+    note_length_preference: string;
+    mnemonic_preference: string;
+    daily_study_goal_hours: string;
+    busyness?: string;
+    study_days?: string[];
+  }>({
+    username: initialUsername || "",
     profession: "",
     quiz_preference: "at_end",
     note_length_preference: "detailed",
     mnemonic_preference: "mixed",
     daily_study_goal_hours: "2",
+    busyness: "Average",
+    study_days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
   });
 
   const [goals, setGoals] = useState<string[]>([]);

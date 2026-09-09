@@ -26,7 +26,7 @@ export default function Dashboard() {
   const [suggestedNote, setSuggestedNote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedTopic, setSelectedTopic] = useState<any>(null);
-  const [burnoutWarning, setBurnoutWarning] = useState<{ active: boolean; required: number; allowed: number, dismissed?: boolean, suggestedDate?: string } | null>(null);
+  const [burnoutWarning, setBurnoutWarning] = useState<{ active: boolean; required: number; allowed: number, dismissed?: boolean, suggestedDate?: string, busyness?: string } | null>(null);
   const [recentNotes, setRecentNotes] = useState<any[]>([]);
   const [hasSchedules, setHasSchedules] = useState(false);
 
@@ -135,7 +135,8 @@ export default function Dashboard() {
               active: true,
               required: Math.round(dailyRequiredHours * 10) / 10,
               allowed: dailyGoalHours,
-              suggestedDate: suggestedDate.toISOString().split('T')[0]
+              suggestedDate: suggestedDate.toISOString().split('T')[0],
+              busyness: profileData?.busyness || "Average"
             });
           }
         }
