@@ -5,6 +5,7 @@ import MDXViewer from "./mdx/MDXViewer";
 import { CheckCircle, Loader2, List, Play, PenTool, Menu, X, BrainCircuit, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import ModalPortal from "@/components/ModalPortal";
 
 export default function NoteReaderContainer({ 
@@ -22,6 +23,9 @@ export default function NoteReaderContainer({
   isOwner?: boolean,
   hideQuizzes?: boolean
 }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  
   const [font, setFont] = useState<"fredoka" | "sans" | "serif" | "mono">("sans");
   const [headings, setHeadings] = useState<{ id: string, text: string, level: number }[]>([]);
   const [activeId, setActiveId] = useState("");
@@ -194,27 +198,30 @@ export default function NoteReaderContainer({
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 relative">
-      {/* Mobile Sticky Action Button to open TOC */}
-      <ModalPortal>
-        <div className="lg:hidden fixed bottom-6 right-6 z-[100]">
-          <button 
-            onClick={() => setMobileMenuOpen(true)}
-            className="modern-button bg-neutral-900 text-white rounded-full p-4 shadow-2xl flex items-center gap-2"
-          >
-            <Menu size={24} /> 
-            <span className="font-bold">Tracker</span>
-          </button>
-        </div>
-
-        {/* Mobile Drawer */}
-        {mobileMenuOpen && (
-          <div className="fixed inset-0 z-[110] lg:hidden flex justify-end bg-neutral-900/20 backdrop-blur-sm">
-            <div className="w-80 h-full bg-white dark:bg-[#34302d] shadow-2xl p-6 overflow-y-auto animate-in slide-in-from-right duration-300">
-              {trackerContentNode}
-            </div>
+      {mounted && typeof document !== "undefined" ? createPortal(
+        <>
+          {/* Mobile Sticky Action Button to open TOC */}
+          <div className="lg:hidden fixed bottom-6 right-6 z-[100] pointer-events-auto">
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className="modern-button bg-neutral-900 text-white rounded-full p-4 shadow-2xl flex items-center gap-2"
+            >
+              <Menu size={24} /> 
+              <span className="font-bold">Tracker</span>
+            </button>
           </div>
-        )}
-      </ModalPortal>
+
+          {/* Mobile Drawer */}
+          {mobileMenuOpen && (
+            <div className="fixed inset-0 z-[110] lg:hidden flex justify-end bg-neutral-900/20 backdrop-blur-sm pointer-events-auto">
+              <div className="w-80 h-full bg-white dark:bg-[#34302d] shadow-2xl p-6 overflow-y-auto animate-in slide-in-from-right duration-300">
+                {trackerContentNode}
+              </div>
+            </div>
+          )}
+        </>,
+        document.body
+      ) : null}
 
       {/* Desktop Sidebar TOC */}
       <div className="hidden lg:block w-64 shrink-0">
