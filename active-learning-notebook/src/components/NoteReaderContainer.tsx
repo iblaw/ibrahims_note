@@ -194,17 +194,15 @@ export default function NoteReaderContainer({
   return (
     <div className="flex flex-col lg:flex-row gap-8 relative">
       {/* Mobile Sticky Action Button to open TOC */}
-      {headings.length > 0 && (
-        <div className="lg:hidden fixed bottom-6 right-6 z-40">
-          <button 
-            onClick={() => setMobileMenuOpen(true)}
-            className="modern-button bg-neutral-900 text-white rounded-full p-4 shadow-2xl flex items-center gap-2"
-          >
-            <Menu size={24} /> 
-            <span className="font-bold">Tracker</span>
-          </button>
-        </div>
-      )}
+      <div className="lg:hidden fixed bottom-6 right-6 z-40">
+        <button 
+          onClick={() => setMobileMenuOpen(true)}
+          className="modern-button bg-neutral-900 text-white rounded-full p-4 shadow-2xl flex items-center gap-2"
+        >
+          <Menu size={24} /> 
+          <span className="font-bold">Tracker</span>
+        </button>
+      </div>
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
@@ -216,13 +214,11 @@ export default function NoteReaderContainer({
       )}
 
       {/* Desktop Sidebar TOC */}
-      {headings.length > 0 && (
-        <div className="hidden lg:block w-64 shrink-0">
-          <div className="sticky top-24 bg-neutral-50 dark:bg-[#34302d] rounded-2xl p-5 border border-neutral-200 dark:border-neutral-700">
-            {trackerContentNode}
-          </div>
+      <div className="hidden lg:block w-64 shrink-0">
+        <div className="sticky top-24 bg-neutral-50 dark:bg-[#34302d] rounded-2xl p-5 border border-neutral-200 dark:border-neutral-700">
+          {trackerContentNode}
         </div>
-      )}
+      </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">

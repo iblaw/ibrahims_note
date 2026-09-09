@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import { validateMdx } from "@/app/actions/validateMdx";
-import { ArrowLeft, Save, Loader2, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Link as LinkIcon, Smartphone, Monitor } from "lucide-react";
 import Link from "next/link";
 
 export default function EditNote({ params }: { params: Promise<{ id: string }> }) {
@@ -28,6 +28,15 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
 
   // Validation State
   const [mdxError, setMdxError] = useState<{message: string, line: number, column: number} | null>(null);
+
+  // Mobile Friendly Editor Toggle
+  const [useBasicEditor, setUseBasicEditor] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setUseBasicEditor(window.innerWidth < 768);
+    }
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -193,7 +202,19 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
       </div>
 
       <div className="space-y-4">
-        {mdxError && (
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300">
+            MDX Content
+          </label>
+          <button 
+            onClick={() => setUseBasicEditor(!useBasicEditor)}
+            className="flex items-center gap-2 text-xs font-bold text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors bg-neutral-100 dark:bg-[#3a3532] px-3 py-1.5 rounded-lg"
+          >
+            {useBasicEditor ? <Monitor size={14} /> : <Smartphone size={14} />}
+            {useBasicEditor ? "Switch to Advanced Editor" : "Switch to Basic Editor (Faster/Mobile)"}
+          </button>
+        </div>
+        {mdxError && !useBasicEditor && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-xl flex items-center justify-between animate-in fade-in zoom-in duration-300">
             <div>
               <p className="text-red-800 dark:text-red-400 font-bold text-sm">Syntax Error Detected</p>
@@ -207,24 +228,36 @@ export default function EditNote({ params }: { params: Promise<{ id: string }> }
             </button>
           </div>
         )}
-        <div className="bg-[#1e1e1e] p-2 rounded-3xl shadow-sm border border-neutral-700 h-[70vh] overflow-hidden">
-          <Editor
-            height="100%"
-            language="markdown"
-            theme="vs-dark"
-            value={content}
-            onChange={(val) => setContent(val || "")}
-            options={{
-              minimap: { enabled: true },
-              fontSize: 14,
-              fontFamily: '"Fira Code", "JetBrains Mono", monospace',
-              wordWrap: "on",
-              padding: { top: 16, bottom: 16 },
-              scrollBeyondLastLine: false,
-              smoothScrolling: true,
-            }}
-          />
-        </div>
+        
+        {useBasicEditor ? (
+          <div className="bg-white dark:bg-[#3a3532] p-2 rounded-3xl shadow-sm border-2 border-neutral-200 dark:border-neutral-700 h-[70vh] flex flex-col">
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Paste your generated MDX here... (Native Mobile Textbox)"
+              className="w-full h-full p-4 bg-transparent outline-none resize-none font-mono text-sm text-neutral-800 dark:text-neutral-200"
+            />
+          </div>
+        ) : (
+          <div className="bg-[#1e1e1e] p-2 rounded-3xl shadow-sm border border-neutral-700 h-[70vh] overflow-hidden">
+            <Editor
+              height="100%"
+              language="markdown"
+              theme="vs-dark"
+              value={content}
+              onChange={(val) => setContent(val || "")}
+              options={{
+                minimap: { enabled: true },
+                fontSize: 14,
+                fontFamily: '"Fira Code", "JetBrains Mono", monospace',
+                wordWrap: "on",
+                padding: { top: 16, bottom: 16 },
+                scrollBeyondLastLine: false,
+                smoothScrolling: true,
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
