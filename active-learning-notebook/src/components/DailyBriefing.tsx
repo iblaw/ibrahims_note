@@ -1,6 +1,6 @@
 "use client";
 
-import { useCompletion } from 'ai/react';
+import { useCompletion } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 
