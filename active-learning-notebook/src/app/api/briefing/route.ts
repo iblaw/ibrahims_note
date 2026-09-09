@@ -29,7 +29,7 @@ Example tone: "Hey Ibrahim! I see we've got a pile of flashcards waiting for us 
       prompt,
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error('Briefing AI Error:', error);
     return NextResponse.json({ error: 'Failed to generate briefing' }, { status: 500 });
