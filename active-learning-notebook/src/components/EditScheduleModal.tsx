@@ -53,8 +53,7 @@ export default function EditScheduleModal({ schedule, courses, onClose, onUpdate
               </div>
               <div>
                 <label className="block text-sm font-bold text-neutral-700 mb-1">Daily Goal (Hours)</label>
-                <p className="text-xs text-neutral-500 font-bold col-span-2">This overrides your Profile setting for this schedule.</p>
-<input type="number" min="1" required value={weeklyHours} onChange={e => setWeeklyHours(Number(e.target.value))} className="w-full p-3 rounded-xl border-2 border-neutral-200 focus:border-neutral-500 font-bold bg-neutral-50" />
+                <input type="number" min="1" required value={weeklyHours} onChange={e => setWeeklyHours(Number(e.target.value))} className="w-full p-3 rounded-xl border-2 border-neutral-200 focus:border-neutral-500 font-bold bg-neutral-50" />
               </div>
             </div>
 

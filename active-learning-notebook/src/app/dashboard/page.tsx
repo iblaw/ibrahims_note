@@ -87,7 +87,8 @@ export default function Dashboard() {
           if (tDate < earliestTargetDate) earliestTargetDate = tDate;
 
           // Generate timetable for today
-          const timetable = generateMasterTimetable(scheduleCourses, profileData || undefined);
+          const mergedProfileData = { ...profileData, daily_study_goal_hours: schedule.weekly_hours || profileData?.daily_study_goal_hours || 2 };
+          const timetable = generateMasterTimetable(scheduleCourses, mergedProfileData);
           if (timetable.length > 0) {
             allTodayTopics = [...allTodayTopics, ...timetable[0]];
           }
@@ -116,7 +117,7 @@ export default function Dashboard() {
         activeDays = Math.max(1, activeDays);
         
         const dailyRequiredHours = (totalRequiredMinutes / 60) / activeDays;
-        const dailyGoalHours = profileData?.daily_study_goal_hours || 2;
+        const dailyGoalHours = (schedulesData && schedulesData.length > 0 && schedulesData[0].weekly_hours) ? schedulesData[0].weekly_hours : (profileData?.daily_study_goal_hours || 2);
         
         if (dailyRequiredHours > dailyGoalHours) {
           const dismissedStr = localStorage.getItem('dismissedBurnoutDailyHours');
@@ -190,30 +191,43 @@ export default function Dashboard() {
               <div>
                 <h3 className="text-xl font-bold text-red-800 dark:text-red-300 mb-1">Burnout Warning 🚨</h3>
                 <p className="text-red-700 dark:text-red-400 font-medium">
-                  Your daily goal is <strong>{burnoutWarning.allowed} hours</strong> on active study days, but to hit your deadlines you need to study <strong>{burnoutWarning.required} hours/day</strong>. Consider pushing your deadlines back or increasing your weekly commitment!
-                </p>
-                <div className="flex flex-wrap items-center gap-4 mt-3">
-                  {schedules.length > 0 && (
-                    <button
+                    Your daily goal is <strong>{burnoutWarning.allowed} hours</strong> on active study days, but to hit your deadlines you need to study <strong>{burnoutWarning.required} hours/day</strong>. Consider pushing your deadlines back or increasing your daily goal!
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3 mt-3">
+                    {schedules.length > 0 && burnoutWarning.suggestedDate && (
+                      <button
+                        onClick={() => {
+                          const mainSchedule = schedules[0];
+                          setEditingSchedule({ ...mainSchedule, target_date: burnoutWarning.suggestedDate });
+                        }}
+                        className="text-sm font-bold bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-sm transition-colors"
+                      >
+                        Extend Deadline to {new Date(burnoutWarning.suggestedDate).toLocaleDateString()}
+                      </button>
+                    )}
+                    
+                    {schedules.length > 0 && burnoutWarning.busyness !== "Very Busy" && (
+                      <button
+                        onClick={() => {
+                          const mainSchedule = schedules[0];
+                          const suggestedAdd = burnoutWarning.busyness === "Light" ? 2 : 1;
+                          setEditingSchedule({ ...mainSchedule, weekly_hours: burnoutWarning.allowed + suggestedAdd });
+                        }}
+                        className="text-sm font-bold bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors"
+                      >
+                        Suggest +{burnoutWarning.busyness === "Light" ? 2 : 1}h Daily Goal
+                      </button>
+                    )}
+                    <button 
                       onClick={() => {
-                        const mainSchedule = schedules[0];
-                        setEditingSchedule({ ...mainSchedule, weekly_hours: burnoutWarning.required });
+                        setBurnoutWarning({ ...burnoutWarning, dismissed: true });
+                        localStorage.setItem('dismissedBurnoutDailyHours', burnoutWarning.required.toString());
                       }}
-                      className="text-sm font-bold bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-sm transition-colors"
+                      className="text-sm font-bold text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 underline underline-offset-2"
                     >
-                      Update commitment to {burnoutWarning.required} hours
+                      I understand, don't warn me again
                     </button>
-                  )}
-                  <button 
-                    onClick={() => {
-                      setBurnoutWarning({ ...burnoutWarning, dismissed: true });
-                      localStorage.setItem('dismissedBurnoutDailyHours', burnoutWarning.required.toString());
-                    }}
-                    className="text-sm font-bold text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 underline underline-offset-2"
-                  >
-                    I understand, don't warn me again
-                  </button>
-                </div>
+                  </div>
               </div>
           </div>
           <button 
