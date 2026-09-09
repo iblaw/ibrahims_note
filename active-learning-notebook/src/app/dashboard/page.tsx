@@ -6,6 +6,7 @@ import { ArrowRight, Book, Calendar, Clock, Loader2, Trophy, BrainCircuit, Flame
 import Link from "next/link";
 import { generateMasterTimetable } from "@/lib/timetable";
 import TopicStudyModal from "@/components/TopicStudyModal";
+import EditScheduleModal from "@/components/EditScheduleModal";
 import { DashboardSkeleton } from "@/components/Skeleton";
 
 export default function Dashboard() {
@@ -16,6 +17,8 @@ export default function Dashboard() {
     totalCards: 0
   });
   const [courses, setCourses] = useState<any[]>([]);
+  const [schedules, setSchedules] = useState<any[]>([]);
+  const [editingSchedule, setEditingSchedule] = useState<any | null>(null);
   const [todayTopics, setTodayTopics] = useState<any[]>([]);
   const [suggestedNote, setSuggestedNote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -51,6 +54,7 @@ export default function Dashboard() {
       setCourses(coursesData);
       
       const { data: schedulesData } = await supabase.from("schedules").select("*").eq("user_id", user.id);
+      if (schedulesData) setSchedules(schedulesData);
       setHasSchedules((schedulesData?.length ?? 0) > 0);
       
       let totalRequiredHoursWeekly = 0;
@@ -107,8 +111,10 @@ export default function Dashboard() {
         setTodayTopics(allTodayTopics);
 
         if (totalRequiredHoursWeekly > totalAllowedHoursWeekly) {
-          const hidden = localStorage.getItem('hideBurnoutWarning');
-          if (hidden !== 'true') {
+          const dismissedHoursStr = localStorage.getItem('dismissedBurnoutHours');
+          const isHidden = dismissedHoursStr && totalRequiredHoursWeekly <= parseFloat(dismissedHoursStr) + 0.1;
+          
+          if (!isHidden) {
             setBurnoutWarning({
               active: true,
               required: Math.round(totalRequiredHoursWeekly),
@@ -174,15 +180,28 @@ export default function Dashboard() {
                 <p className="text-red-700 dark:text-red-400 font-medium">
                   You committed to <strong>{burnoutWarning.allowed} hours/week</strong> of study, but to hit your deadlines you need to study <strong>{burnoutWarning.required} hours/week</strong>. Consider pushing your deadlines back or increasing your weekly commitment!
                 </p>
-                <button 
-                  onClick={() => {
-                    setBurnoutWarning({ ...burnoutWarning, dismissed: true });
-                    localStorage.setItem('hideBurnoutWarning', 'true');
-                  }}
-                  className="mt-3 text-sm font-bold text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 underline underline-offset-2"
-                >
-                  I understand, don't warn me again
-                </button>
+                <div className="flex flex-wrap items-center gap-4 mt-3">
+                  {schedules.length > 0 && (
+                    <button
+                      onClick={() => {
+                        const mainSchedule = schedules[0];
+                        setEditingSchedule({ ...mainSchedule, weekly_hours: burnoutWarning.required });
+                      }}
+                      className="text-sm font-bold bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-sm transition-colors"
+                    >
+                      Update commitment to {burnoutWarning.required} hours
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => {
+                      setBurnoutWarning({ ...burnoutWarning, dismissed: true });
+                      localStorage.setItem('dismissedBurnoutHours', burnoutWarning.required.toString());
+                    }}
+                    className="text-sm font-bold text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 underline underline-offset-2"
+                  >
+                    I understand, don't warn me again
+                  </button>
+                </div>
               </div>
           </div>
           <button 
@@ -389,6 +408,18 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {editingSchedule && (
+        <EditScheduleModal
+          schedule={editingSchedule}
+          courses={courses}
+          onClose={() => setEditingSchedule(null)}
+          onUpdated={() => {
+            setEditingSchedule(null);
+            window.location.reload();
+          }}
+        />
+      )}
 
       {selectedTopic && (
         <TopicStudyModal 
