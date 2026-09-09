@@ -107,11 +107,14 @@ export default function Dashboard() {
         setTodayTopics(allTodayTopics);
 
         if (totalRequiredHoursWeekly > totalAllowedHoursWeekly) {
-          setBurnoutWarning({
-            active: true,
-            required: Math.round(totalRequiredHoursWeekly),
-            allowed: totalAllowedHoursWeekly
-          });
+          const hidden = localStorage.getItem('hideBurnoutWarning');
+          if (hidden !== 'true') {
+            setBurnoutWarning({
+              active: true,
+              required: Math.round(totalRequiredHoursWeekly),
+              allowed: totalAllowedHoursWeekly
+            });
+          }
         }
       }
 
@@ -166,12 +169,21 @@ export default function Dashboard() {
         <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-900/50 p-6 rounded-2xl flex items-start justify-between gap-4">
           <div className="flex gap-4">
             <AlertTriangle className="text-red-500 shrink-0" size={32} />
-            <div>
-              <h3 className="text-xl font-bold text-red-800 dark:text-red-300 mb-1">Burnout Warning 🔥</h3>
-              <p className="text-red-700 dark:text-red-400 font-medium">
-                You committed to <strong>{burnoutWarning.allowed} hours/week</strong> of study, but to hit your deadlines you need to study <strong>{burnoutWarning.required} hours/week</strong>. Consider pushing your deadlines back or increasing your weekly commitment!
-              </p>
-            </div>
+              <div>
+                <h3 className="text-xl font-bold text-red-800 dark:text-red-300 mb-1">Burnout Warning 🚨</h3>
+                <p className="text-red-700 dark:text-red-400 font-medium">
+                  You committed to <strong>{burnoutWarning.allowed} hours/week</strong> of study, but to hit your deadlines you need to study <strong>{burnoutWarning.required} hours/week</strong>. Consider pushing your deadlines back or increasing your weekly commitment!
+                </p>
+                <button 
+                  onClick={() => {
+                    setBurnoutWarning({ ...burnoutWarning, dismissed: true });
+                    localStorage.setItem('hideBurnoutWarning', 'true');
+                  }}
+                  className="mt-3 text-sm font-bold text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 underline underline-offset-2"
+                >
+                  I understand, don't warn me again
+                </button>
+              </div>
           </div>
           <button 
             onClick={() => setBurnoutWarning({ ...burnoutWarning, dismissed: true })}
