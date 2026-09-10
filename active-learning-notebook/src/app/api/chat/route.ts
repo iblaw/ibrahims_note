@@ -1,20 +1,5 @@
-import { streamText, tool } from 'ai';
+import { streamText } from 'ai';
 import { google } from '@ai-sdk/google';
-import { z } from 'zod';
-
-// We'll define tools here later for Generative UI (e.g. renderQuiz)
-const tools = {
-  // Example dummy tool for now to test the structure
-  getWeather: tool({
-    description: 'Get the weather for a location',
-    parameters: z.object({
-      location: z.string().describe('The city name'),
-    }),
-    execute: async ({ location }) => {
-      return { weather: 'Sunny', temperature: 75, location };
-    },
-  })
-};
 
 const SYSTEM_PROMPT = `
 You are Lumen, an empathetic, highly intelligent study mentor. 
@@ -41,10 +26,9 @@ export async function POST(req: Request) {
       model: google('gemini-2.5-flash'),
       system: SYSTEM_PROMPT,
       messages,
-      tools, // Prepping the Generative UI tool interface
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error('Lumen Chat API Error:', error);
     return new Response(JSON.stringify({ error: 'Failed to communicate with Lumen.' }), {

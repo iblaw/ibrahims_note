@@ -5,16 +5,27 @@ import { useChat } from "@ai-sdk/react";
 import { Sparkles, Send, User, Brain, Loader2 } from "lucide-react";
 
 export default function StudyChatPage() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
-    api: '/api/chat',
-    initialMessages: [
-      {
-        id: "welcome-message",
+  const { messages, sendMessage, stop, error, status } = useChat();
+  const [input, setInput] = React.useState("");
+
+  // Add initial message on mount
+  useEffect(() => {
+    if (messages.length === 0) {
+      sendMessage({
         role: "assistant",
-        content: "Hey Ibrahim! 👋 I'm Lumen, your new study partner. I noticed you have some goals set up in your Timetable. What are we focusing on today? We could review your flashcards or start breaking down a new topic!",
-      }
-    ]
-  });
+        parts: [{ type: "text", text: "Hey Ibrahim! 👋 I'm Lumen, your new study partner. I noticed you have some goals set up in your Timetable. What are we focusing on today? We could review your flashcards or start breaking down a new topic!" }]
+      });
+    }
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    sendMessage({ role: 'user', parts: [{ type: 'text', text: input }] });
+    setInput("");
+  };
+
+  const isLoading = status === 'streaming' || status === 'submitted';
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -74,8 +85,16 @@ export default function StudyChatPage() {
                     : 'bg-white dark:bg-[#2a2624] text-neutral-800 dark:text-neutral-200 border-2 border-neutral-100 dark:border-neutral-800 rounded-tl-sm'
                   }`}
                 >
-                  {/* Basic Markdown Rendering (For now we just render text, later we'll use react-markdown) */}
-                  <div className="whitespace-pre-wrap">{m.content}</div>
+                  <div className="whitespace-pre-wrap">
+                    {/* Render text parts */}
+                    {m.parts?.map((part, i) => (
+                      <React.Fragment key={i}>
+                        {part.type === 'text' ? part.text : null}
+                      </React.Fragment>
+                    ))}
+                    {/* Fallback for classic content string if present */}
+                    {(m as any).content}
+                  </div>
                 </div>
               </div>
             </div>
@@ -106,7 +125,7 @@ export default function StudyChatPage() {
           >
             <textarea
               value={input}
-              onChange={handleInputChange}
+              onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a question, request a quiz, or just vent about your exams..."
               className="flex-1 max-h-40 min-h-[44px] bg-transparent outline-none resize-none px-3 py-2.5 text-neutral-800 dark:text-neutral-200 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 font-medium text-[15px]"
               onKeyDown={(e) => {
