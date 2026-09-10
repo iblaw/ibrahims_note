@@ -10,7 +10,7 @@ import Editor, { useMonaco } from "@monaco-editor/react";
 import { validateMdx } from "@/app/actions/validateMdx";
 
 export default function CreateNote() {
-  const { complete, completion, isLoading: isGenerating, stop } = useCompletion({ 
+  const { complete, completion, isLoading: isGenerating, stop, error } = useCompletion({ 
     api: "/api/generate-note",
     onFinish: (prompt, result) => {
       setContent(result);
@@ -78,7 +78,7 @@ export default function CreateNote() {
     if (generateParam === 'true' && profile && !isGenerating && !content) {
       // Small timeout to ensure states (like selectedTopics) are fully applied
       setTimeout(() => {
-        complete(getDynamicPrompt());
+        complete(getDynamicPrompt()).catch(err => console.error('Generation failed:', err));
         // Remove generate=true from URL so it doesn't trigger again on reload
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete('generate');
@@ -307,18 +307,27 @@ ANTI-LAZINESS RULES (MANDATORY):
         </button>
       </div>
 
-      <div className="bg-neutral-100 dark:bg-[#34302d] p-6 rounded-2xl border border-neutral-200 dark:border-neutral-700 flex flex-col sm:flex-row gap-6 items-center justify-between">
-        <p className="text-lg text-neutral-700 dark:text-neutral-300 font-medium">
-          Need the AI prompt template? Copy it here and paste it into ChatGPT or Gemini to generate your note!
-        </p>
-        <button
-          onClick={handleCopyPrompt}
-          className="shrink-0 flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#403b38] border border-neutral-200 dark:border-neutral-600 rounded-full font-bold hover:bg-neutral-50 dark:hover:bg-[#4d4844] transition-colors"
-        >
-          {copied ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
-          {copied ? "Copied!" : "Copy AI Prompt"}
-        </button>
-      </div>
+              {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-200 dark:border-red-800 text-red-800 dark:text-red-400 font-bold text-sm mb-4">
+            AI Generation Error: {error.message || "Please ensure your Gemini API key is configured correctly in .env.local."}
+          </div>
+        )}
+
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-2xl border border-blue-200 dark:border-blue-800/50 flex flex-col sm:flex-row gap-6 items-center justify-between">
+          <div>
+            <h3 className="text-lg font-extrabold text-blue-900 dark:text-blue-300 mb-1">Lumen AI Generation</h3>
+            <p className="text-sm text-blue-700 dark:text-blue-400 font-medium">
+              Automatically generate a comprehensive note based on your learning style.
+            </p>
+          </div>
+          <button
+            onClick={() => isGenerating ? stop() : complete(getDynamicPrompt()).catch(err => console.error(err))}
+            className="shrink-0 flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md shadow-blue-500/20"
+          >
+            {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+            {isGenerating ? "Stop Generation" : "Generate with AI"}
+          </button>
+        </div>
 
       <div className="space-y-6">
         <div>
