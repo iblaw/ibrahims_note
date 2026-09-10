@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
 
-    const result = streamText({
+    const result = await streamText({
       model: google('gemini-2.5-flash'),
       prompt,
     });
