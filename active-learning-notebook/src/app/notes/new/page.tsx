@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useCompletion } from "@ai-sdk/react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { Sparkles, Loader2, Copy, Check, Link as LinkIcon, Smartphone, Monitor, X, Search } from "lucide-react";
+import { Sparkles, Loader2, Copy, Check, Link as LinkIcon, Smartphone, Monitor, X, Search, Upload, FileText } from "lucide-react";
 
 import Editor, { useMonaco } from "@monaco-editor/react";
 import { validateMdx } from "@/app/actions/validateMdx";
@@ -43,6 +43,7 @@ export default function CreateNote() {
 
   // Mobile Friendly Editor Toggle
   const [useBasicEditor, setUseBasicEditor] = useState(false);
+  const [classContext, setClassContext] = useState("");
 
   const router = useRouter();
 
@@ -132,7 +133,21 @@ export default function CreateNote() {
       if (profile.learning_style) personaInstruction += `\n- Learning Style: ${profile.learning_style}`;
     }
 
-    return `Context: You are an expert instructional designer and AI tutor. Your task is to generate a Note Document for a specialized Active Learning platform.${personaInstruction}${topicInstruction}
+    
+    let contextInstruction = "";
+    if (classContext.trim()) {
+      contextInstruction = `
+
+*** USER'S CLASS NOTES / CONTEXT ***
+The user provided the following raw class notes/context for this topic:
+\"\"\"
+${classContext}
+\"\"\"
+CRITICAL: You MUST integrate this specific information, emphasize the points they highlighted, and ensure your generated note directly addresses their uploaded context.`;
+    }
+
+    return `Context: You are an expert instructional designer and AI tutor. Your task is to generate a Note Document for a specialized Active Learning platform.${personaInstruction}${topicInstruction}${contextInstruction}
+
 
 Core Philosophy: Do not generate passive blocks of text. The content must adhere to Richard Feynman's learning principles and the science of Active Recall.
 
