@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Loader2, X, CheckCircle2, Book, Trophy, Sparkles, FileText } from "lucide-react";
 import Link from "next/link";
+import ModalPortal from "@/components/ModalPortal";
 
 export default function TopicStudyModal({ topic, onClose, onComplete }: { topic: any, onClose: () => void, onComplete: () => void }) {
+
   const [loading, setLoading] = useState(false);
   const [markingComplete, setMarkingComplete] = useState(false);
   const [myNotes, setMyNotes] = useState<any[]>([]);
@@ -73,7 +75,9 @@ export default function TopicStudyModal({ topic, onClose, onComplete }: { topic:
     onComplete();
   };
 
+  if (!mounted) return null;
   return (
+    createPortal(
     <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
       <div className="bg-white rounded-[1.5rem] p-6 w-full max-w-lg shadow-2xl relative overflow-y-auto max-h-[90vh]">
         <button onClick={onClose} className="absolute top-5 right-5 p-2 bg-neutral-100 text-neutral-500 rounded-full hover:bg-neutral-200 hover:text-neutral-900 transition-colors">
@@ -160,5 +164,6 @@ export default function TopicStudyModal({ topic, onClose, onComplete }: { topic:
         </div>
       </div>
     </div>
+      </ModalPortal>
   );
 }
