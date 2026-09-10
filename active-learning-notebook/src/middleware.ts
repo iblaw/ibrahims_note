@@ -62,10 +62,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If user is logged in and visits root or login, redirect to /notes
+  // If user is logged in and visits root or login, redirect to /study
   if (user && (pathname === '/' || pathname === '/login')) {
     const url = request.nextUrl.clone()
-    url.pathname = '/notes'
+    url.pathname = '/study'
     return NextResponse.redirect(url)
   }
 

@@ -1,4 +1,4 @@
-import { streamText } from 'ai';
+import { streamText, convertToModelMessages } from 'ai';
 import { google } from '@ai-sdk/google';
 
 const SYSTEM_PROMPT = `
@@ -23,9 +23,9 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
 
     const result = await streamText({
-      model: google('gemini-2.5-flash'),
+      model: google('gemini-3.6-flash'),
       system: SYSTEM_PROMPT,
-      messages,
+      messages: convertToModelMessages(messages),
     });
 
     return result.toTextStreamResponse();
