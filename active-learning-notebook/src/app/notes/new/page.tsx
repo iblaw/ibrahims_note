@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useCompletion } from "@ai-sdk/react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { Sparkles, Loader2, Copy, Check, Link as LinkIcon, Smartphone, Monitor, X, Search } from "lucide-react";
@@ -9,6 +10,19 @@ import Editor, { useMonaco } from "@monaco-editor/react";
 import { validateMdx } from "@/app/actions/validateMdx";
 
 export default function CreateNote() {
+  const { complete, completion, isLoading: isGenerating, stop } = useCompletion({ 
+    api: "/api/generate-note",
+    onFinish: (prompt, result) => {
+      setContent(result);
+    }
+  });
+
+  useEffect(() => {
+    if (completion) {
+      setContent(completion);
+    }
+  }, [completion]);
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +69,24 @@ export default function CreateNote() {
     }
   }, []);
 
+  
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const generateParam = searchParams.get('generate');
+    
+    // Only auto-generate if generate=true, profile is loaded, and we haven't started yet
+    if (generateParam === 'true' && profile && !isGenerating && !content) {
+      // Small timeout to ensure states (like selectedTopics) are fully applied
+      setTimeout(() => {
+        complete(getDynamicPrompt());
+        // Remove generate=true from URL so it doesn't trigger again on reload
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('generate');
+        window.history.replaceState({}, '', newUrl.pathname + newUrl.search);
+      }, 500);
+    }
+  }, [profile, complete]);
+
   const fetchProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -68,7 +100,7 @@ export default function CreateNote() {
     if (data) setCourses(data);
   };
 
-  const getDynamicPrompt = () => {
+  function getDynamicPrompt() {
     let quizInstruction = `3. Chunking & In-Text Quizzes\n- Break the document into logical segments (2-3 paragraphs max).\n- At the end of EVERY segment, you MUST insert a set of quizzes (at least 3-4 quizzes per section) to comprehensively test the user's understanding of that segment.\n- Format EACH quiz EXACTLY like this:\n<Quiz question="[Question text]" options="[Option 1] | [Option 2] | [Option 3]" answer="[Exact text of correct option]" />`;
 
     let mnemonicInstruction = "";
